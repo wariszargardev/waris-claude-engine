@@ -10,6 +10,8 @@ My asking for this deploy is permission to commit, push, open the PR, review it,
 
 **Always run it end to end. Don't stop to ask me and don't present a plan.** Make the call using the rules below and record every decision in the PR's "Deploy notes" section and in the final report. I review the PR afterwards.
 
+**Plan mode:** if the session is in Plan mode, skip the analysis write-up — call ExitPlanMode right away with one line ("Deploy <branch> to <env> per deploy-env"), then run the steps.
+
 **Rule:** no new feature code, refactors or improvements in the deploy branch. Feature fixes go in the feature branch. Merge glue (step 7) is the only exception.
 
 **Run unattended.** I often start a deploy and move to another task, so never wait on me mid-way. Keep commands simple so they match my allowed-commands list: one command per call, no `cd <dir> &&` prefix (use `git -C "<worktree>" …` or the worktree as the working directory), no pipes or `;` chains.

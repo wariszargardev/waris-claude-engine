@@ -48,7 +48,10 @@ No CU → drop `-<cu-id>`.
 - **Existing branch already in a worktree** (`git worktree list`) → use that folder. If it's clean, `git pull`; if it has uncommitted changes that aren't from this task, stop and show me.
 - **Existing branch, no worktree** → `git worktree add "D:/Afia Insurance/Projects/Office/<repo>-<requirement>" <branch>`.
 - **New branch** → `git worktree add --no-track -b <branch> "D:/Afia Insurance/Projects/Office/<repo>-<requirement>" origin/<develop|main>` (`--no-track` is required).
-- Folder name `<repo>-<requirement>`: 2–4 kebab-case words, no CU id, no feat/fix prefix, never random.
+- Folder name `<repo>-<requirement>`: 2–4 kebab-case words naming what the task is about, no CU id, no feat/fix prefix, never random. Don't wait for approval of the names — show them in the report.
+  - `fix/book-policy-email-document-existence-check` → `blanka-book-policy-doc-check`
+  - `feat/bnpl-ep-remain-selected-z8znm13naj` → `blanka-bnpl-ep-selection`
+- **Fix on an existing branch** (I name a branch or say "existing branch", e.g. "recommendation engine branch"): no new branch. Match my words against `git worktree list` / `git branch -a`; exactly one match → use it, several → ask. Then the two "Existing branch" rules above, then the normal plan → approve → build flow.
 - "Already used by worktree at <path>": don't force — go there, `git pull` if clean, come back and continue.
 
 ## 3. Setup (blanka / IMCRM; skip what's already done in an existing worktree)
