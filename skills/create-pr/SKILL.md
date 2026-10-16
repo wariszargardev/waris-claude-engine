@@ -19,7 +19,11 @@ My request is permission for every step below (commit, push, branch, merge, buil
 | **main** | `main` | `hotfix/…` branch → **hotfix** (can change); anything else → **prod** (frozen to the stage-verified version) | |
 
 - **Base override** ("base: x", "make it develop") wins.
-- **Feature branch:** the one I name → else this chat's worktree / the attached project's current branch → else ask (only other question). Not usable: a protected branch, detached HEAD. Given a deploy branch → feature = its name with `-<env>-deployment` removed (CU id stays) and continue from where it stopped.
+- **Feature branch:** the one I name → else this chat's worktree / the attached project's current branch → else ask (only other question). Given a deploy branch → feature = its name with `-<env>-deployment` removed (CU id stays) and continue from where it stopped.
+  - **Current branch is protected (e.g. the main checkout on `develop`) or detached:** that is NOT a stop and NOT a reason to talk about the main checkout's own files. List my candidate branches — open PRs (`gh pr list -R InsuranceMarket-ae/blanka --author "@me" --state open`) and worktrees (`git worktree list`) — and ask once: "Which branch?" with the top 4 as options. Then work only in that branch's worktree.
+  - Uncommitted files in the main checkout (e.g. `.mcp.json`) are never part of a PR and never block one; ignore them.
+- **Existing open PR** for head + base → reuse it (refresh the branch, re-label), don't open a second one.
+- **Run gh with `-R InsuranceMarket-ae/blanka`** — the chat's cwd may be another repo.
 - **Deploy branch name (strict):** the feature name exactly, with `-<env>-deployment` inserted before the trailing CU id (CU id = last `-` segment, 8–10 lowercase letters+digits with ≥1 digit). No CU id → append. Never `chore/`, `release/`, dates or reordering. `feat/Alternative-Plans-Engine-86exb1kft` → `feat/Alternative-Plans-Engine-uat-deployment-86exb1kft`. Develop-sync (no feature): `fix/develop-sync-<env>-deployment`.
 - **Protected branches** (`waris-claude-engine/hooks/protected-branches.json`): PRs go *into* them; never push, commit, merge, reset or delete *on* them, never `gh pr merge`. A fix that would have to land on one → open the PR without the label and report.
 - **"skip review"** → no local review (step 5) and no bot loop (step 11); PR opened without the label.

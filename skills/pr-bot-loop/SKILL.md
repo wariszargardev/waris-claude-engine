@@ -9,9 +9,10 @@ argument-hint: <pr-number> [fix-branch: <branch>] [deploy-branch: <branch>] [no-
 Inputs: PR number; **fix branch** (the feature/fix/hotfix branch — all code fixes go there); **deploy branch** for test/uat/dev PRs; `no-code-changes` for stage/prod PRs. Skipped when I said "skip review".
 
 ## 1. Wait for the bot (don't block the chat)
-The bot comment starts "## Automated PR review — `<sha>`" (author `AhsanAshfaq`) plus inline review threads; it usually lands 5–8 minutes after the label. Note the head SHA (`gh pr view <pr> --json headRefOid`). Start a **Monitor** polling every 60 s (max 15 min):
-`gh api repos/InsuranceMarket-ae/blanka/issues/<pr>/comments --jq '.[] | select(.body | contains("Automated PR review")) | .body[0:120]'`
-until one mentions the first 10 chars of the head SHA. Nothing in 15 min → report "bot didn't review yet", leave the label on, stop.
+The bot (author `AhsanAshfaq`) posts either a **PR review** ("## Automated re-review @ `<sha8>`") or an **issue comment** ("## Automated PR review — `<sha>`"), plus inline review threads; it usually lands 5–8 minutes after the label. Note the head SHA (`gh pr view <pr> -R InsuranceMarket-ae/blanka --json headRefOid`) and the label time. Poll in the background every 60 s (max 15 min) and check **both** places for a body containing "Automated" and the first 8 chars of the head SHA:
+- `gh api repos/InsuranceMarket-ae/blanka/pulls/<pr>/reviews --jq '.[] | select(.body | contains("Automated")) | .commit_id[0:8] + " " + .body[0:80]'`
+- `gh api repos/InsuranceMarket-ae/blanka/issues/<pr>/comments --jq '.[] | select(.body | contains("Automated")) | .body[0:120]'`
+Nothing in 15 min → also check for any `AhsanAshfaq` review/comment newer than the label time before giving up; still nothing → report "bot didn't review yet", leave the label on, stop.
 
 ## 2. Decide every comment (unresolved `reviewThreads` + the summary for this SHA)
 | Decision | When | Action |
