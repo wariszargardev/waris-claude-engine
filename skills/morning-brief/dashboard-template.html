@@ -1,0 +1,156 @@
+<title>Waris Morning Brief</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,600;8..60,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: day-sheet dashboard — Top 3 first, then a 2x2 grid of the four sources; summary before detail */
+:root {
+  --bg: #f7f7f4; --surface: #ffffff; --fg: #1d1f1e; --muted: #626864; --line: #e2e4df;
+  --accent: #2f5d50; --accent-soft: #e6efeb;
+  --red: #b4322a; --red-soft: #fbeceb; --amber: #a86a0c; --amber-soft: #fbf1df;
+  --green: #2e7d4f; --green-soft: #e7f4ec; --grey: #8a8f8b; --grey-soft: #f0f1ee;
+  --display: "Source Serif 4", Georgia, serif;
+  --body: "IBM Plex Sans", system-ui, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #161817; --surface: #1f2221; --fg: #e9ebe8; --muted: #a3a9a5; --line: #323735;
+  --accent: #8cc4b0; --accent-soft: #23332d;
+  --red: #f08a80; --red-soft: #3a2220; --amber: #e9b45a; --amber-soft: #382c17;
+  --green: #7fd1a0; --green-soft: #1e3227; --grey: #9aa09c; --grey-soft: #2a2e2c; color-scheme: dark; } }
+:root[data-theme="dark"] {
+  --bg: #161817; --surface: #1f2221; --fg: #e9ebe8; --muted: #a3a9a5; --line: #323735;
+  --accent: #8cc4b0; --accent-soft: #23332d;
+  --red: #f08a80; --red-soft: #3a2220; --amber: #e9b45a; --amber-soft: #382c17;
+  --green: #7fd1a0; --green-soft: #1e3227; --grey: #9aa09c; --grey-soft: #2a2e2c; color-scheme: dark; }
+body { background: var(--bg); color: var(--fg); font-family: var(--body); font-size: 15px; line-height: 1.5; padding-inline: 16px; padding-block: 28px 56px; }
+main { max-width: 1040px; margin: 0 auto; display: grid; gap: 20px; }
+header { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 8px 16px; }
+h1 { font-family: var(--display); font-size: 1.9rem; margin: 0; letter-spacing: -.01em; }
+.date { color: var(--muted); font-family: var(--mono); font-size: .85rem; }
+.pills { display: flex; flex-wrap: wrap; gap: 8px; }
+.pill { font-size: .8rem; font-weight: 600; padding: 3px 10px; border-radius: 999px; }
+.p-red { background: var(--red-soft); color: var(--red); }
+.p-amber { background: var(--amber-soft); color: var(--amber); }
+.p-green { background: var(--green-soft); color: var(--green); }
+.p-grey { background: var(--grey-soft); color: var(--grey); }
+.p-accent { background: var(--accent-soft); color: var(--accent); }
+.top3 { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 18px 20px; }
+.top3 h2, .card h2 { font-family: var(--display); font-size: 1.15rem; margin: 0 0 12px; }
+.top3 ol { margin: 0; padding: 0; list-style: none; display: grid; gap: 10px; counter-reset: t; }
+.top3 li { display: grid; grid-template-columns: 28px 1fr; gap: 10px; align-items: start; counter-increment: t; }
+.top3 li::before { content: counter(t); font-family: var(--mono); font-weight: 500; width: 24px; height: 24px; border-radius: 6px; display: grid; place-items: center; background: var(--accent-soft); color: var(--accent); font-size: .85rem; }
+.top3 b { font-weight: 600; }
+.grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
+@media (max-width: 760px) { .grid { grid-template-columns: 1fr; } }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 18px 20px; min-width: 0; }
+.card h2 { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+.card h2 small { font-family: var(--body); font-size: .78rem; font-weight: 500; color: var(--muted); }
+.rows { display: grid; gap: 8px; margin: 0; padding: 0; list-style: none; }
+.row { display: grid; grid-template-columns: 4px 1fr auto; gap: 10px; align-items: center; padding: 8px 10px; border-radius: 8px; background: var(--bg); }
+.row .bar { align-self: stretch; border-radius: 2px; }
+.row .t { min-width: 0; }
+.row .t div:first-child { font-weight: 600; }
+.row .t div + div { color: var(--muted); font-size: .85rem; }
+.row .n { font-family: var(--mono); font-size: .85rem; color: var(--muted); white-space: nowrap; text-align: right; }
+.b-red { background: var(--red); } .b-amber { background: var(--amber); } .b-green { background: var(--green); } .b-grey { background: var(--grey); }
+.ok { color: var(--muted); font-size: .85rem; margin-top: 10px; }
+a { color: var(--accent); text-underline-offset: 2px; }
+.label { font-size: .72rem; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); font-weight: 600; margin: 14px 0 6px; }
+.label:first-of-type { margin-top: 0; }
+.pipe { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 6px; margin-bottom: 4px; }
+.stage { text-align: center; padding: 8px 4px; border-radius: 8px; background: var(--bg); }
+.stage b { display: block; font-family: var(--mono); font-size: 1.15rem; font-weight: 500; font-variant-numeric: tabular-nums; }
+.stage span { font-size: .72rem; color: var(--muted); }
+.stage.hot { background: var(--amber-soft); } .stage.hot b { color: var(--amber); }
+@media (max-width: 420px) { .pipe { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+.tl { display: grid; gap: 8px; margin: 0; padding: 0; list-style: none; }
+.tl li { display: grid; grid-template-columns: 96px 1fr; gap: 12px; padding: 8px 10px; border-radius: 8px; background: var(--bg); }
+.tl .time { font-family: var(--mono); font-size: .85rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+.tl .focus { background: var(--green-soft); }
+.tl .focus .time, .tl .focus div { color: var(--green); }
+.foot { color: var(--muted); font-size: .8rem; text-align: center; }
+</style>
+
+<main>
+  <header>
+    <div>
+      <h1>Morning brief</h1>
+      <div class="date">Fri 09 Oct 2026 · PKT</div>
+    </div>
+    <div class="pills">
+      <span class="pill p-red">2 red</span>
+      <span class="pill p-amber">1 reply owed</span>
+      <span class="pill p-accent">2 meetings · 1 h</span>
+    </div>
+  </header>
+
+  <section class="top3">
+    <h2>Top 3 for today</h2>
+    <ol>
+      <li><div><b>Reply to Suad</b> on <a href="https://app.clickup.com/t/86ey84htw">Customer Email Address – Forcing Function</a>: override list limited to Fayaz only until Lloyd sends the numbers.</div></li>
+      <li><div><b>Fix myAlfred <code>readyNow()</code></b>: about 29.7k errors a day on UAT and on test. The callback queue class is missing a method.</div></li>
+      <li><div><b>Recommendation engine on UAT</b>: successes dropped from 544 to 6 while three FR-19 tasks wait for UAT testing.</div></li>
+    </ol>
+  </section>
+
+  <div class="grid">
+    <section class="card">
+      <h2>Axiom <small>last 24 h vs day before</small></h2>
+      <ul class="rows">
+        <li class="row"><span class="bar b-red"></span><div class="t"><div>myAlfred SQS</div><div>UAT + test · readyNow() undefined</div></div><div class="n">29.7k/env</div></li>
+        <li class="row"><span class="bar b-red"></span><div class="t"><div>Recommendation engine</div><div>UAT · success 544 → 6 · 216 failed runs</div></div><div class="n">216 ✕</div></li>
+        <li class="row"><span class="bar b-amber"></span><div class="t"><div>BOR / consent logs</div><div>test · personal quote not found</div></div><div class="n">16 → 45</div></li>
+        <li class="row"><span class="bar b-grey"></span><div class="t"><div>No logs</div><div>Book policy email (test) · MA welcome (UAT)</div></div><div class="n">—</div></li>
+      </ul>
+      <div class="ok">✅ Document upload and Payment are clean on prod, UAT and test.</div>
+    </section>
+
+    <section class="card">
+      <h2>ClickUp threads <small>last 7 days</small></h2>
+      <div class="label">Reply owed · 1</div>
+      <ul class="rows">
+        <li class="row"><span class="bar b-amber"></span><div class="t"><div><a href="https://app.clickup.com/t/86ey84htw">Forcing Function</a></div><div>Suad Ajmal · Fayaz-only override, no reply yet</div></div><div class="n">prod</div></li>
+      </ul>
+      <div class="label">New requirement · 2</div>
+      <ul class="rows">
+        <li class="row"><span class="bar b-grey"></span><div class="t"><div><a href="https://app.clickup.com/t/86ey84htw">Forcing Function</a></div><div>Limit override list to Fayaz for now</div></div><div class="n">Suad</div></li>
+        <li class="row"><span class="bar b-grey"></span><div class="t"><div><a href="https://app.clickup.com/t/z8znm1a6zk">Reminders after expiry</a></div><div>On UAT · your T+10 → T+9 question unanswered</div></div><div class="n">Shereen</div></li>
+      </ul>
+      <div class="ok">No issues reported on your tasks.</div>
+    </section>
+
+    <section class="card">
+      <h2>Release pipeline <small>my tasks</small></h2>
+      <div class="pipe">
+        <div class="stage"><b>1</b><span>Issues</span></div>
+        <div class="stage"><b>4</b><span>Test</span></div>
+        <div class="stage hot"><b>19</b><span>UAT</span></div>
+        <div class="stage"><b>6</b><span>Stage</span></div>
+        <div class="stage"><b>8</b><span>Prod-ready</span></div>
+        <div class="stage"><b>33</b><span>In prod</span></div>
+      </div>
+      <div class="label">Waiting for test</div>
+      <ul class="rows">
+        <li class="row"><span class="bar b-green"></span><div class="t"><div><a href="https://app.clickup.com/t/z8znm1a1ng">Alternative plans sorting order</a></div><div>Ready to test · UAT</div></div><div class="n">0d</div></li>
+        <li class="row"><span class="bar b-green"></span><div class="t"><div><a href="https://app.clickup.com/t/86exnca69">US-19.10 Config management</a></div><div>Ready to test · UAT</div></div><div class="n">1d</div></li>
+        <li class="row"><span class="bar b-amber"></span><div class="t"><div><a href="https://app.clickup.com/t/86exb1kft">FR-19 Alternative Plans Engine</a></div><div>In progress · UAT test</div></div><div class="n">14d</div></li>
+        <li class="row"><span class="bar b-amber"></span><div class="t"><div><a href="https://app.clickup.com/t/86exaftvm">Restrict Tabby – Send update</a></div><div>Ready for staging</div></div><div class="n">16d</div></li>
+      </ul>
+      <div class="ok">9 FR-19 user stories have been on UAT for 51 days.</div>
+    </section>
+
+    <section class="card">
+      <h2>Meetings <small>2 today · 1 h</small></h2>
+      <ul class="tl">
+        <li class="focus"><span class="time">09:00–11:00</span><div>Focus time</div></li>
+        <li><span class="time">11:00–11:30</span><div><b>Daily Standup</b><div class="ok" style="margin:0">Ahsan Ashfaq · <a href="https://meet.google.com/pdh-avig-wme">Meet</a></div></div></li>
+        <li class="focus"><span class="time">11:30–16:00</span><div>Focus time</div></li>
+        <li><span class="time">16:00–16:30</span><div><b>Standup – Health Renewal Revamp</b><div class="ok" style="margin:0">Shereen Budensab · <a href="https://meet.google.com/uso-geyw-tnw">Meet</a></div></div></li>
+      </ul>
+      <div class="ok">No new invites. Both standups recur and were never answered.</div>
+    </section>
+  </div>
+
+  <div class="foot">Generated by Claude from Axiom, ClickUp and Google Calendar · read-only</div>
+</main>

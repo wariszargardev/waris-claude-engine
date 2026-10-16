@@ -1,0 +1,139 @@
+{
+  "env": {
+    "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"
+  },
+  "permissions": {
+    "allow": [
+      "Bash(git worktree:*)",
+      "Bash(git -C:*)",
+      "Bash(git merge-base:*)",
+      "Bash(git rev-list:*)",
+      "Bash(git show:*)",
+      "Bash(git ls-tree:*)",
+      "Bash(git restore:*)",
+      "Bash(npx vite build:*)",
+      "Bash(gh pr comment:*)",
+      "PowerShell(npx vite build:*)",
+      "Bash(git ls-files:*)",
+      "Bash(git rev-parse:*)",
+      "Bash(doppler setup:*)",
+      "Bash(gh pr checks:*)",
+      "PowerShell(composer install:*)",
+      "PowerShell(doppler setup:*)",
+      "Bash(git fetch:*)",
+      "Bash(git pull:*)",
+      "Bash(git switch:*)",
+      "Bash(git checkout:*)",
+      "Bash(git merge:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(git status:*)",
+      "Bash(git diff:*)",
+      "Bash(git log:*)",
+      "Bash(git branch:*)",
+      "Bash(git ls-remote:*)",
+      "Bash(git merge-tree:*)",
+      "Bash(gh pr create:*)",
+      "Bash(gh pr edit:*)",
+      "Bash(gh pr view:*)",
+      "Bash(gh pr list:*)",
+      "Bash(gh pr diff:*)",
+      "Bash(gh api:*)",
+      "Bash(yarn prod:*)",
+      "Bash(php artisan test:*)",
+      "PowerShell(git:*)",
+      "PowerShell(gh pr:*)",
+      "PowerShell(yarn prod:*)",
+      "PowerShell(php artisan test:*)"
+    ],
+    "deny": [
+      "Bash(git push --force:*)",
+      "Bash(git push -f:*)",
+      "Bash(git push --force-with-lease:*)",
+      "Bash(gh pr merge:*)",
+      "PowerShell(git push --force:*)",
+      "PowerShell(git push -f:*)",
+      "PowerShell(gh pr merge:*)"
+    ],
+    "defaultMode": "auto"
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash|PowerShell",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"C:/Users/Muhammad Waris/.claude/hooks/protect-branches.js\""
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"C:/Users/Muhammad Waris/.claude/hooks/skill-check.js\""
+          }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"C:/Users/Muhammad Waris/.claude/hooks/skill-check.js\""
+          }
+        ]
+      }
+    ]
+  },
+  "enabledPlugins": {
+    "alfred-orchestrator@alfred": true,
+    "postman@claude-plugins-official": true
+  },
+  "extraKnownMarketplaces": {
+    "alfred": {
+      "source": {
+        "source": "directory",
+        "path": "D:\\Afia Insurance\\Projects\\Office\\claude"
+      }
+    }
+  },
+  "autoMode": {
+    "soft_deny": [
+      "$defaults",
+      "Bash(doppler secrets delete:*) — scoped to this repo's Doppler config",
+      "Bash(php artisan migrate:fresh:*) — scoped to this repo (production-data risk per project docs)"
+    ],
+    "environment": [
+      "### Org-wide",
+      "**Organization**: InsuranceMarket-ae (GitHub org, remote `github-office:InsuranceMarket-ae/blanka.git`)",
+      "**Cloud provider(s)**: AWS (referenced in .env.example — AWS_ACCESS_KEY_ID/AWS_BUCKET/AWS_DEFAULT_REGION, SQS)",
+      "**Repository visibility**: Not queryable via gh in this run; treat as private (owner/repo not confirmed public) — verify before relying on this",
+      "**Internal sharing / snippet hosting**: None configured — treat public paste/gist services as outside the trust boundary",
+      "**Secrets management**: Doppler CLI (per README setup instructions and shell history — 190 invocations)",
+      "**Default / protected branches**: Default branch is `develop`; branch protection/rulesets not queryable via gh in this run",
+      "**CI/CD deploy targets**: Azure DevOps staging pipeline (dev.azure.com/insurancemarketafia/org-afia) referenced in README badge",
+      "**Network posture**: None configured",
+      "**Source control**: The blanka repo and its `origin` remote (github-office:InsuranceMarket-ae/blanka.git) only",
+      "**Trusted internal domains**: alfred.ae subdomains used by this app (imcrm.alfred.ae, imcrmstage.alfred.ae, imcrmuat.alfred.ae, imcrmdev.alfred.ae, imcrmdev01.alfred.ae, imcrmdev02.alfred.ae, imcrmtest.alfred.ae) — from README and contacted host in usage data",
+      "**Trusted cloud buckets**: None configured",
+      "**Key internal services**: kenapi-stage.alfred.ae (VALUATION_API_URL), devwp.waypoint-systems.com (NGI_API_BASE_URL) — from .env.example",
+      "**Internal package registry**: None configured",
+      "**Sensitive data locations & audiences**: .env, .env.backup, /storage/*.key (gitignored — credentials); public/vendors/jquery-knob/secretplan.jpg (filename-flagged, unverified content); CI secrets referenced by name only (GITHUB_TOKEN, GOOGLE_CHAT_WEBHOOK, GOOGLE_CHAT_WEBHOOK_MAIN, SERVICE_ACCOUNT_PAT, SONAR_TOKEN) — share only with cleared engineering team members",
+      "**Data retention / declassification**: None configured",
+      "**Sensitive remote targets**: any host/namespace containing `prod` or `production` as a whole segment; note imcrm.alfred.ae (Live) and imcrmstage/imcrmuat/imcrmdev/imcrmtest subdomains are production-adjacent environments without the literal word 'prod' in the name — treat imcrm.alfred.ae (Live) as a production target",
+      "**Protected deployment namespaces / environments**: None configured — fall back to the Sensitive remote targets heuristic (imcrm.alfred.ae Live is the production deploy target)",
+      "**Protected IaC scopes**: IAM, RBAC, networking, quota, and node-pool resources; anything whose name or tag carries `prod` or `production` as a whole word or name segment",
+      "### User-specific",
+      "**Primary use of Claude Code**: software development (Laravel/Inertia/Vue application — IMCRM)",
+      "**Trusted repo**: D:\\Afia Insurance\\Projects\\Office\\blanka (working directory) and its `origin` remote (github-office:InsuranceMarket-ae/blanka.git)",
+      "**Org-specific CLIs**: doppler (secrets), yarn, pnpm, composer, php artisan, cloudflared (from shell history)"
+    ]
+  }
+}
