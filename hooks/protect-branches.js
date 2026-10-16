@@ -1,12 +1,15 @@
 // PreToolUse (Bash | PowerShell): never push, commit, merge or rewrite on shared base branches.
-// Protected: main, develop, test-env-deployment, uat-env-deployment, new-dev-env-deployment, dev-env-deployment.
-// Only repos whose origin is InsuranceMarket-ae/* are protected; personal repos are not.
+// Protected branches and repo owners come from protected-branches.json next to this file (edit it when names change).
 // Deploy branches like fix/x-uat-deployment-<cu> stay allowed. Exit 2 = block (stderr goes to Claude).
 const { execFileSync } = require('child_process');
 const path = require('path');
 
-const PROTECTED = new Set(['main', 'master', 'develop', 'test-env-deployment', 'uat-env-deployment', 'new-dev-env-deployment', 'dev-env-deployment']);
-const MSG = 'Protected branch — use a feature or deploy branch. main, develop and the test/UAT/dev env-deployment branches never get a direct push, commit, merge or PR merge from Claude. If a human really needs this, Waris runs it himself.';
+const fs = require('fs');
+const DEFAULTS = { repoOwners: ['InsuranceMarket-ae/'], branches: ['main', 'master', 'develop', 'test-env-deployment', 'uat-env-deployment', 'new-dev-env-deployment', 'dev-env-deployment'] };
+let CONFIG = DEFAULTS;
+try { CONFIG = { ...DEFAULTS, ...JSON.parse(fs.readFileSync(path.join(fs.realpathSync(__dirname), 'protected-branches.json'), 'utf8')) }; } catch {}
+const PROTECTED = new Set(CONFIG.branches);
+const MSG = 'Protected branch — open a PR into it instead (/create-pr). Claude never pushes, commits, merges, resets or deletes on ' + [...PROTECTED].join(', ') + ', and never merges a PR. If a human really needs this, Waris runs it himself.';
 
 let raw = '';
 process.stdin.on('data', d => (raw += d));

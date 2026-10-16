@@ -1,43 +1,39 @@
 ---
 name: pr-bot-loop
-description: After a blanka PR gets the "ready for review" label, wait for the GitHub review bot's comments (5–10 min), read them, fix only the important ones (real bugs, Critical/High) in the right branch, then remove the label, push, and re-add the label so the bot reviews the final version — max 2 rounds. Shared by create-pr (all modes) and deploy-env. Skipped when I say "skip review". Use when I say "watch the PR bot", "handle bot comments on PR <n>", or when one of those skills reaches its label step.
+description: After a blanka PR gets the "ready for review" label, wait for the GitHub review bot (Claude code review posted as AhsanAshfaq, 5–8 min), then decide each comment myself — reply with the reason and resolve it (label stays on), or, when code must change, remove the label, fix in the feature branch, re-merge into the deploy branch, run pr-review on the fix, push and re-add the label. Max 2 rounds. Used by create-pr for every target. Skipped with "skip review". Use when I say "watch the PR bot", "handle bot comments on PR <n>".
 argument-hint: <pr-number> [fix-branch: <branch>] [deploy-branch: <branch>] [no-code-changes]
 ---
 
 # PR bot loop
 
-Inputs: the PR number; the **fix branch** (where code fixes go — the feature/fix/hotfix branch); for deploy PRs also the **deploy branch** to re-merge into; `no-code-changes` for release (stage/prod) PRs.
-
-**Skipped entirely** when I said "skip review" / "skip pr-review" for this run.
+Inputs: PR number; **fix branch** (the feature/fix/hotfix branch — all code fixes go there); **deploy branch** for test/uat/dev PRs; `no-code-changes` for stage/prod PRs. Skipped when I said "skip review".
 
 ## 1. Wait for the bot (don't block the chat)
+The bot comment starts "## Automated PR review — `<sha>`" (author `AhsanAshfaq`) plus inline review threads; it usually lands 5–8 minutes after the label. Note the head SHA (`gh pr view <pr> --json headRefOid`). Start a **Monitor** polling every 60 s (max 15 min):
+`gh api repos/InsuranceMarket-ae/blanka/issues/<pr>/comments --jq '.[] | select(.body | contains("Automated PR review")) | .body[0:120]'`
+until one mentions the first 10 chars of the head SHA. Nothing in 15 min → report "bot didn't review yet", leave the label on, stop.
 
-The bot (comments by `AhsanAshfaq` starting "## Automated PR review — `<sha>`", plus inline review comments) usually answers 5–10 minutes after the label.
-- Note the PR head SHA (`gh pr view <pr> --json headRefOid`) and the label time.
-- Start a **Monitor** that polls every 60 s (max 15 min) until an issue comment containing "Automated PR review" and the first 10 chars of the head SHA appears:
-  `gh api repos/InsuranceMarket-ae/blanka/issues/<pr>/comments --jq '.[] | select(.body | contains("Automated PR review")) | .body[0:120]'`
-- Meanwhile you may answer me about other things. If nothing appears in 15 min → report "bot didn't review yet" and stop the loop (the label stays on).
+## 2. Decide every comment (unresolved `reviewThreads` + the summary for this SHA)
+| Decision | When | Action |
+|---|---|---|
+| **Fix in code** | real bug, security/data-loss risk, Critical/High, a test that doesn't test what it says, or a cheap clear in-scope improvement | step 3 |
+| **Reply + resolve** | intended behaviour, already handled, out of scope (→ follow-up), debatable, Medium/Low not worth a change | reply with the direct reason (1–3 lines) → resolve |
+| **Leave for me** | needs a business/product decision or a migration/data change | no reply, no resolve; list it with my recommendation |
 
-## 2. Read and sort the comments
+Judge by the code, not the bot's severity alone. `no-code-changes` → every "Fix in code" becomes reply-with-reason + resolve, listed as a follow-up.
 
-Unresolved review threads (GraphQL `reviewThreads`) + the bot's summary comment for this SHA. Sort each into:
-- **Fix** — 🔴 Critical / 🟠 High, or anything that is a real bug, security issue, data-loss risk, or a test that doesn't test what it claims. Must be inside this PR's scope.
-- **Leave for me** — 🟡 Medium / 🔵 Low, style, debatable, out of scope, or needs a business decision. Don't fix, don't resolve; list them in the report.
+**No "Fix in code" items → don't touch the label.** Reply + resolve, report, stop.
 
-## 3. Fix (only if there's something in "Fix")
+## 3. Fix (only when code must change)
+1. `gh pr edit <pr> --remove-label "ready for review"` — before any code change.
+2. Fix in the **fix branch** (never in a deploy branch or a protected branch). Run only the affected tests. Commit `fix: <what> (PR review)`, push.
+3. Deploy PR → in its worktree `git merge --no-ff <fix-branch>` into the deploy branch; install/build only if deps/frontend changed; affected tests; push. (A fix that exists only in the deploy branch is merge glue and must not carry feature logic.)
+4. Run `pr-review` scoped to the fix commits; real bugs → fix again (counts as a round).
+5. Reply "Fixed in `<sha>` — <what changed>" on each fixed thread and resolve it; reply + resolve the others as decided.
+6. `gh pr edit <pr> --add-label "ready for review"` → back to step 1 (round 2).
 
-- `no-code-changes` (release PRs: the code must stay identical to the version verified on UAT/stage) → **don't change code**: reply to each "Fix" comment with the direct reason and resolve it, list it as a follow-up in the report. Go to step 4.
-- Otherwise:
-  1. `gh pr edit <pr> --remove-label "ready for review"`.
-  2. Fix in the **fix branch** (never in a deploy branch or develop/main). Run only the affected tests. Commit `fix: <what> (PR review)`, push.
-  3. Deploy PR → `git switch <deploy-branch>`, `git merge --no-ff <fix-branch>`, run the affected tests (install/build only if deps/frontend changed), push.
-  4. Reply to each fixed comment "Fixed in `<sha>`" and resolve its thread (GraphQL `resolveReviewThread`). Don't touch "Leave for me" comments.
-
-## 4. Re-label and repeat
-
-- If code changed → `gh pr edit <pr> --add-label "ready for review"` and go back to step 1 (round 2).
-- **Max 2 rounds.** After round 2, or when there's nothing to fix → make sure the label is on and stop.
+## 4. Stop
+Max 2 rounds. Make sure the label is on at the end unless tests are failing.
 
 ## Report
-
-Per round: bot findings count by severity, what was fixed (commit SHAs), what was replied/resolved, and the "Leave for me" list with links. Never merge.
+Per round: findings by severity, fixed (SHAs), replied + resolved (with one-line reasons), left for me (links + recommendation), label status. Never merge.

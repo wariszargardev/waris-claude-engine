@@ -75,8 +75,8 @@ Repo: `D:\Afia Insurance\Projects\Office\blanka` (run `git -C` against it; `git 
    - ⏳ **PR open into develop — pending stage merge**: number + title + link, labels (`ready for review`?), days open.
    - 🆕 **No PR yet** (separate list): branch name, last commit date, which worktree has it (`git worktree list`).
 4. **Create the missing PRs** — after posting the brief, for each 🆕 branch run the `create-pr` skill:
-   - `feat/…` or `fix/…` → `create-pr` normal mode for `<branch>` (PR into `develop`).
-   - `hotfix/…` → `create-pr` normal mode for `<branch>` (PR into `main`).
+   - `feat/…` or `fix/…` → `create-pr` with target `develop` for `<branch>`.
+   - `hotfix/…` → `create-pr` with target `main` (hotfix) for `<branch>`.
    - **Skip and report instead** (don't create) when: the branch's worktree has uncommitted changes; the branch has 0 commits ahead of its base (`git rev-list --count origin/<base>..<branch>`); or its last commit is under 2 hours old (likely still in progress).
    - Run them one at a time; one failing doesn't stop the others. Never merge.
    - Then post one extra message to the Morning Brief space: `*🌿 PRs created — <n>*` with each PR link, base, label status, and the skipped branches with the reason.

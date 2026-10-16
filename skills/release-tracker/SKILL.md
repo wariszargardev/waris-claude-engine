@@ -61,7 +61,7 @@ For every open item with a `branch` or `cu_id` (repo `InsuranceMarket-ae/blanka`
 
 ## Hooks into other skills
 
-- **deploy-env / create-pr (normal, stage, prod):** at the end, upsert the item for that feature branch (env cell = the PR just opened, state `open`; stage unchanged until merged) — one batch, no refresh of everything.
+- **create-pr (every target, incl. /deploy-env):** at the end, upsert the item for that feature branch (env cell = the PR just opened, state `open`; stage unchanged until merged) — one batch, no refresh of everything.
 - **morning-brief:** run the refresh, then add a "📋 Release tracker" section: urgent items, flagged items, and the page link.
 
 ## Report

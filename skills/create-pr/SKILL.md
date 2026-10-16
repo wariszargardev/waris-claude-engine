@@ -1,47 +1,80 @@
 ---
 name: create-pr
-description: The one PR command for blanka. Commits and pushes any pending work, builds assets and pushes, then opens (or reuses) the PR — normal mode = my new work into develop (hotfix/ → main, or the base I name) with local review and bot-comment fixes; "stage" = PR into develop that must match the version verified on UAT; "prod" = PR into main that must match the version verified on stage (code frozen, bot comments answered with reasons). Adds "ready for review" and runs pr-bot-loop. Never merges. Use for "create PR", "create PR stage", "create PR prod", "stage PR", "prod PR", "/create-pr".
-argument-hint: [stage|prod] [branch] [base: develop|main] [skip review]
+description: The one PR command for blanka — opens a PR into any target. Asks which target if not given; develop (new work, or stage = the UAT-verified version), test / uat / dev (builds the deploy branch from that env's base, merges the feature in, resolves conflicts), or main (hotfix, or prod = the stage-verified version). Commits pending work, builds only what changed, runs only relevant tests, local review, one push, PR, "ready for review" label, then handles the review bot's comments (reply + resolve, or remove label → fix in the feature branch → review → push → re-add label). Never pushes, commits or merges into protected branches and never merges a PR. Use for "create PR", "create PR uat/test/dev/stage/prod", "deploy to uat/test/dev", "/create-pr", "/deploy-env".
+argument-hint: <develop|stage|test|uat|dev|main|prod> [feature-branch] [base: x] [skip review] [bypass]
 ---
 
-# Create PR (normal · stage · prod)
+# Create PR — every target
 
-My request is permission to commit, push, open/update the PR, label it, and (normal mode) fix important bot findings. Run end to end; ask only at a hard stop or if no branch can be found.
+My request is permission for every step below (commit, push, branch, merge, build, tests, PR, label, review fixes in the feature branch). Run end to end and unattended; ask only the target question or at a hard stop. Record every decision in the PR's notes and the report. In Plan mode: ExitPlanMode at once with one line ("PR <branch> → <target> per create-pr"), then run.
 
-## 0. Mode, branch, base
+## 0. Target, branch, base
 
-| I say | Mode | Base | Code |
+**Target** — from my words; if I gave none, ask once: "Which target: develop (stage), test, UAT, dev, or main (hotfix/prod)?"
+
+| Target | Base | PR head | Code |
 |---|---|---|---|
-| "create PR" | **normal** | `hotfix/…` → `main`; `feat/…`/`fix/…` → `develop` | can change (self-review + bot fixes) |
-| "create PR **stage**" / "stage PR" | **stage** | `develop` | **frozen** — must match the version verified on UAT |
-| "create PR **prod**" / "prod PR" | **prod** | `main` | **frozen** — must match the version verified on stage |
+| **develop** | `develop` | the feature branch | **new work** (no merged UAT deploy yet) → can change; **stage** (a UAT deploy PR for it is merged, or I said "stage") → frozen to the UAT-verified version |
+| **test / uat / dev** | `test-env-deployment` / `uat-env-deployment` / `new-dev-env-deployment` | a deploy branch cut from that base | feature code changes only in the feature branch |
+| **main** | `main` | `hotfix/…` branch → **hotfix** (can change); anything else → **prod** (frozen to the stage-verified version) | |
 
-- **Base override:** if I name a base ("make it develop", `base: main`) → mine wins in every mode.
-- **Branch:** the one I name; else this chat's worktree branch / the attached project's current branch. Not usable if it's `develop`, `main` or a `*-env-deployment` base branch (prod may use `develop` as head for a develop → main release). Nothing usable → ask me (only question).
-- **"skip review"** → skip step 4 (local review) and step 10 (bot loop); open the PR without the label.
+- **Base override** ("base: x", "make it develop") wins.
+- **Feature branch:** the one I name → else this chat's worktree / the attached project's current branch → else ask (only other question). Not usable: a protected branch, detached HEAD. Given a deploy branch → feature = its name with `-<env>-deployment` removed (CU id stays) and continue from where it stopped.
+- **Deploy branch name (strict):** the feature name exactly, with `-<env>-deployment` inserted before the trailing CU id (CU id = last `-` segment, 8–10 lowercase letters+digits with ≥1 digit). No CU id → append. Never `chore/`, `release/`, dates or reordering. `feat/Alternative-Plans-Engine-86exb1kft` → `feat/Alternative-Plans-Engine-uat-deployment-86exb1kft`. Develop-sync (no feature): `fix/develop-sync-<env>-deployment`.
+- **Protected branches** (`waris-claude-engine/hooks/protected-branches.json`): PRs go *into* them; never push, commit, merge, reset or delete *on* them, never `gh pr merge`. A fix that would have to land on one → open the PR without the label and report.
+- **"skip review"** → no local review (step 5) and no bot loop (step 11); PR opened without the label.
 
-**Hard stops:** unrelated/secret files would be committed (show me); push/gh/auth fails; a fix needs a migration, data change or `.env`; a code fix is needed but the head is develop/main/a deployment branch (open the PR without the label and report).
+**Hard stops:** uncommitted changes in a frozen (stage/prod) run; env base not updated from develop (step 3); secrets/unrelated files would be committed; push/gh/auth fails; a fix needs a migration, data change or `.env`.
 
-## Steps
+## 1. Worktree + sync
+Find the feature branch's worktree (`git worktree list`); none → `git worktree add "D:\Afia Insurance\Projects\Office\<repo>-<requirement>" <branch>` + setup (composer `--ignore-platform-reqs` via PowerShell, `yarn prod`, doppler). `git fetch origin`; behind its remote → `git pull`. Busy in another worktree → don't force; `git pull` there if clean, else stop. One command per call, no `cd … &&` chains (use `git -C`).
 
-1. **Worktree + sync:** find the worktree with this branch (`git worktree list`); none → `git worktree add "D:\Afia Insurance\Projects\Office\<repo>-<requirement>" <branch>` + worktree setup. `git fetch origin`; behind its remote → `git pull`.
-2. **Pending work first:**
-   - **normal:** KB doc + skill done (else do them); `git status` → commit only this task's files (`<feat|fix>: <what>`), never `.env`/secrets/unrelated files.
-   - **stage / prod:** uncommitted changes → **stop and show me** (they weren't tested on UAT/stage). Unpushed commits are fine (pushed in step 6).
-3. **Mergeable with the base:** `git merge-tree --write-tree --name-only origin/<base> <branch>`. Conflicts → merge `origin/<base>` into the branch (no rebase), resolve keeping both sides' intent, commit `chore: merge <base> into <branch>`; list resolved files for the PR.
-4. **Local review (normal mode only; skip with "skip review"):** sub-agents on `git diff origin/<base>...HEAD`: blanka `pr-review`, `alfred-orchestrator:find-bugs` (+ QA/security reviewers when payments, auth, uploads, external APIs or customer data are touched). Fix real bugs / Critical / High here, run affected tests, commit `fix: <what> (self-review)`; max 2 rounds; Medium/Low → PR description.
-5. **Verify — stage / prod only ("ship exactly what was verified"):**
-   - stage: find the merged UAT deploy PR (`gh pr list --search "head:<branch>-uat-deployment" --state merged`); prod: the merged stage PR into develop.
-   - For every file in `git diff --name-only origin/<base>...<branch>`, compare with the verified head commit. Differences not coming from the base → `git revert` the commit that added them (never force-push). Base changes stay.
-   - No verified deploy exists → don't compare; note "Not deployed to UAT/stage yet — no verified version to compare".
-6. **Build, then push:** `yarn prod` (normal mode always; stage/prod only if composer/package/frontend files changed after steps 3–5, `composer install` likewise). Build files changed → commit `chore: build assets`. Then `git push -u origin <branch>` — one push with everything.
-7. **Tests:** only the relevant ones (test files in the diff + tests covering changed classes), `--parallel` if >10. Failure from merging the base → smallest merge-glue fix; failure in feature code → normal: fix it; stage/prod: don't change feature code — open the PR without the label and report.
-8. **Open or reuse the PR:** reuse an open PR for this head + base; else `gh pr create --base <base> --head <branch> --title "<title incl. CU id>" --body-file <file>`. Title prefix: stage `[STAGE]`, prod `[PROD]`. Body: CU link + title, Issue, What we fixed / built, What's covered, Tests, repo checklist, plus **Release notes**: conflicts resolved, self-review fixes / reverted extras, build/deps run or skipped, tests + results, items left for me. stage/prod → also post one PR comment: "This PR carries exactly the version verified on <UAT|stage> (PR #<n>) — please confirm it works."
-9. **Label:** re-check mergeability first (base may have moved; conflicts → back to step 3). Label already on → remove and re-add; else add `ready for review`.
-10. **Bot loop (skip with "skip review"):** `pr-bot-loop` — normal mode with `fix-branch: <branch>`; stage/prod with `no-code-changes` (reasons + resolve, real bugs as follow-ups) unless I say "fix the bot comments".
-11. **Release tracker:** upsert this branch's item per the `release-tracker` skill (env = stage for a `develop` PR, prod for a `main` PR; `{pr, state: "open"}`; add `next`).
-12. **Never merge. Never force-push.**
+## 2. Pending work
+- **new work / hotfix:** KB doc + skill done (else do them); commit only this task's files (`<feat|fix>: <what>`), never `.env`/secrets/unrelated files.
+- **stage / prod:** uncommitted changes → stop and show me.
+- **test / uat / dev:** uncommitted changes in the feature branch → stop (hard stop). Then `git push -u origin <feature-branch>`.
+
+## 3. Pre-check the base (test / uat / dev only — before creating anything)
+```
+git merge-base <feature> origin/develop                       # <fork>
+git rev-list --count origin/<base>..<fork>                     # develop commits the base lacks
+git merge-tree --write-tree --name-only origin/<base> <feature>
+git diff --name-only origin/<base>...<fork>
+```
+- Clean preview → continue (note the missing-commit count).
+- A conflicted file is touched by the missing develop commits → **stop, create nothing**: "`<base>` is not updated from develop" + count + files. Post once per 24h to ENG - Code Reviews (`spaces/AAQAOvX47Qo`, check `search_messages` for "update the deployment branches" first), tagging Ahsan `<chat-user data-user="users/100003347646761463026"/>`: "Please update the deployment branches from `develop` … `<base>`: <n> commits missing … Blocked: `<feature>` → `<env>`." "bypass" → still post, then continue.
+- Conflicts only in the feature's own files → continue and resolve in step 4.
+
+## 4. Build the PR head
+- **develop / main:** `git merge-tree` against `origin/<base>`; conflicts → merge `origin/<base>` into the feature branch (no rebase), resolve keeping both intents, commit `chore: merge <base> into <branch>`.
+- **test / uat / dev:** `git switch -c <deploy-branch> --no-track origin/<base>` (exists → switch + merge `origin/<base>`), then `git merge --no-ff <feature>`. Resolve: feature's files keep the feature logic + what the base needs; other files keep the base + what compiles; combine imports/constants/columns; `public/build/**` → base side (rebuilt in step 6). Log each file → side kept; business-logic calls marked "please verify".
+- **Never put feature code in a deploy branch.** A problem in the feature → fix it in the feature branch, push, re-merge. Only merge-glue (`chore: merge fix for <env> deployment`) lives in the deploy branch.
+
+## 5. Local review (new work, hotfix, test/uat/dev; skip with "skip review")
+Sub-agents on the PR's own changes (feature diff + conflict-resolved files + merge glue, not develop's commits): blanka `pr-review`, `alfred-orchestrator:find-bugs`, plus QA/security reviewers when payments, auth, uploads, external APIs or customer data are touched. Real bugs / Critical / High → fix in the feature branch, test, commit `fix: <what> (self-review)`, re-merge for deploy PRs. Max 2 rounds; the rest → PR notes.
+
+**stage / prod instead — ship exactly what was verified:** find the verified PR (stage: merged `<branch>-uat-deployment` PR; prod: merged stage PR). For each file in `git diff --name-only origin/<base>...<branch>`, compare with the verified head; extras not from the base → `git revert` (never force-push). No verified deploy → note it.
+
+## 6. Install, build, push
+Compare what's installed with the result (`git diff --name-only <feature> HEAD -- …` for deploy branches):
+- composer files changed → `composer install --ignore-platform-reqs`; `package.json`/`yarn.lock` changed → `yarn prod`; frontend only → `npx vite build && npx vite build --config vite-worker.config.js`; nothing → skip. New work/hotfix → always `yarn prod`.
+- Build output changed → commit `chore: build assets`. Then one `git push -u origin <head>`.
+
+## 7. Tests — only what changed
+Test files in the diff + tests covering changed classes and conflict-resolved files; `php artisan test --compact <files>` (`--parallel` >10). Failure: feature bug → fix in the feature branch (+re-merge); merge clash → smallest glue fix; fails on a clean base too → note it. Max 2 rounds; still failing → PR without the label. Frozen runs never change feature code.
+
+## 8. Open or reuse the PR
+Reuse an open PR for this head + base; else `gh pr create --base <base> --head <head> --title "<[STAGE]/[PROD]/[UAT]/[TEST]/[DEV] prefix> <title incl. CU id>" --body-file <file>`. Body (repo template if it exists): CU link + title, Issue, What we fixed / built, What's covered, Tests, plus **Notes**: conflicts resolved (file → side, "please verify"), merge glue, self-review fixes / reverted extras, deps/build run or skipped, missing develop commits, pre-existing failures, items left for me. stage/prod → also comment "This PR carries exactly the version verified on <UAT|stage> (PR #<n>) — please confirm it works."
+
+## 9. Label
+Re-check mergeability (base moved → back to step 4). Label already on → remove and re-add; else `gh pr edit <pr> --add-label "ready for review"`.
+
+## 10. Never merge, never force-push
+## 11. Review bot → `pr-bot-loop`
+Pass `fix-branch: <feature>`, `deploy-branch: <deploy-branch>` for test/uat/dev, `no-code-changes` for stage/prod (unless I say "fix the bot comments").
+
+## 12. Release tracker
+Upsert the feature's item per `release-tracker`: env (test/uat/dev/stage=develop/prod=main) = `{pr, state: "open"}`, `next` = what's waiting. Also after a stale-base stop.
 
 ## Report
-
-Mode, PR link, branch → base (and why), commits made (pending work, merge, fixes, build), reverted extras (stage/prod), tests + results, bot rounds, label status, items left for me. End with **Branch** and **Directory**.
+Target + mode, PR link, head → base (and why), deploy-branch name, commits (pending work, merges, glue, fixes, build), conflicts + sides, deps/build run or skipped, tests + results, review/bot rounds (fixed vs replied), label status, items left for me. End with **Branch** and **Directory**.

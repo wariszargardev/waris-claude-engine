@@ -39,7 +39,7 @@ _Scope: work under `D:\Afia Insurance\Projects\Office\` (blanka and the other of
 
 ## Git (safety — always)
 - Never commit or push unless I ask ("create PR", a deploy, a release PR). Only exception: `/start-work` pushes a new branch once after setup.
-- **Protected** in company repos: `main`, `develop`, `test-env-deployment`, `uat-env-deployment`, `new-dev-env-deployment`. Never push, commit, merge, reset or delete there, and never merge a PR — a human does that. The `protect-branches` hook blocks it; don't work around it, stop and tell me.
+- **Protected** in company repos (list in `waris-claude-engine/hooks/protected-branches.json`; today `main`, `develop`, `test-env-deployment`, `uat-env-deployment`, `new-dev-env-deployment`): I may open PRs *into* them, but never push, commit, merge, reset or delete on them, and never merge a PR — even if GitHub doesn't protect them. A human merges. The `protect-branches` hook blocks it; don't work around it, stop and tell me.
 - Never force-push, rebase shared branches, or delete branches without asking.
 - "Already used by worktree at …": don't force; `git pull` there if clean (else stop and tell me), then come back.
 
@@ -47,8 +47,7 @@ _Scope: work under `D:\Afia Insurance\Projects\Office\` (blanka and the other of
 | I say | Skill | Never break |
 |---|---|---|
 | plan a CU / start work / "approved" / existing-branch fix | `plan-cu`, `start-work` | moves CU to "in progress - development" first; worktree per task under `Office\`; no push after the first |
-| create PR (normal / stage / prod) | `create-pr` (+ `pr-bot-loop`) | stage/prod ship exactly the UAT/stage-verified version; review findings there get reasons, not code |
-| deploy to test / UAT / dev | `deploy-env` | unattended; stop if the base isn't updated from develop (ping Ahsan); deploy branch = feature name + `-<env>-deployment` before the CU id |
+| create PR / deploy — any target: develop (stage), test, UAT, dev, main (hotfix/prod) | `create-pr` (`/deploy-env <env>` is a shortcut; + `pr-bot-loop`) | asks the target if I didn't say; PRs go *into* protected branches, never push/commit/merge on them; feature fixes only in the feature branch; stage/prod ship exactly the verified version; stop if an env base isn't updated from develop (ping Ahsan); deploy branch = feature name with `-<env>-deployment` before the CU id (`feat/X-86abc1234` → `feat/X-uat-deployment-86abc1234`); bot comments that only need answers → reply + resolve, label stays; code fix → remove label → fix in feature branch → re-merge → review → push → re-add label |
 | PR comments | `pr-comments` | fixes go in the feature branch, never in a deploy/base branch |
 | clear the worktree | `clear-worktree` | stop on uncommitted/unpushed work; remote only with "both local and remote" |
 | track / untrack / release status | `release-tracker` | data lives on the claude.ai page, never in chat or files |

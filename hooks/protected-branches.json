@@ -1,0 +1,13 @@
+{
+  "_note": "Edit this list when branch names change. Claude may open PRs INTO these branches but never push, commit, merge, reset or delete on them, and never merges a PR. Applies to repos whose origin URL contains one of repoOwners.",
+  "repoOwners": ["InsuranceMarket-ae/"],
+  "branches": [
+    "main",
+    "master",
+    "develop",
+    "test-env-deployment",
+    "uat-env-deployment",
+    "new-dev-env-deployment",
+    "dev-env-deployment"
+  ]
+}
