@@ -57,4 +57,5 @@ _Scope: work under `D:\Afia Insurance\Projects\Office\` (blanka and the other of
 ## My engine (waris-claude-engine)
 - My setup lives in `D:\Afia Insurance\Projects\Office\waris-claude-engine` (git, `wariszargardev/waris-claude-engine`); `~/.claude` links into it.
 - New personal skill → `waris-claude-engine/skills/<name>/` + run `install.ps1`. Feature skills stay in their repo. Changed `settings.json` → `scripts/snapshot.ps1`. Never commit secrets, webhooks or prod data.
+- **Maker and checker for skills:** a skill with a `tests.md` isn't done after an edit until `scripts/skill-tests.ps1 <skill>` passes every case (a fresh Claude answers from the skill, a second one grades it). A failing case means fix the skill (or a wrong test), never ignore it. New important skill → add 3–7 real cases to its `tests.md`.
 - If I repeat the same multi-step process, suggest turning it into a skill.

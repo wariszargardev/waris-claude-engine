@@ -30,6 +30,7 @@ waris-claude-engine/
 ├── settings/settings.json   permissions, deny list, hook registration, default mode
 ├── docs/                    pipeline cheat-sheet
 ├── scripts/snapshot.ps1     copies the live settings.json back into the repo
+├── scripts/skill-tests.ps1  maker + checker dry run of a skill's tests.md (PASS/FAIL per case)
 └── install.ps1              links everything into ~/.claude (no admin needed)
 ```
 
