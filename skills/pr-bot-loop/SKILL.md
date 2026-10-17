@@ -14,6 +14,8 @@ The bot (author `AhsanAshfaq`) posts either a **PR review** ("## Automated re-re
 - `gh api repos/InsuranceMarket-ae/blanka/issues/<pr>/comments --jq '.[] | select(.body | contains("Automated")) | .body[0:120]'`
 Nothing in 15 min → also check for any `AhsanAshfaq` review/comment newer than the label time before giving up; still nothing → report "bot didn't review yet", leave the label on, stop.
 
+Run the waiting/reading in step 1 through `pr-plumber` in the background; the lead does step 2 onward.
+
 ## 2. Decide every comment (unresolved `reviewThreads` + the summary for this SHA)
 | Decision | When | Action |
 |---|---|---|

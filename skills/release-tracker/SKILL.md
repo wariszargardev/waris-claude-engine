@@ -44,6 +44,8 @@ Always `get`/`list` first and pass `if_version` on writes to existing docs. Seve
 
 ## Refresh (from the source of truth)
 
+In parallel: `pr-plumber` for the GitHub PR lookups and `clickup-reader` for the CU statuses; the lead computes stages, flags and writes the database.
+
 For every open item with a `branch` or `cu_id` (repo `InsuranceMarket-ae/blanka`):
 1. PRs: `gh pr list --state all --search "<cu-id or branch> in:head" --json number,headRefName,baseRefName,state,mergedAt`. Map base → env: `test-env-deployment` → test, `uat-env-deployment` → uat, `new-dev-env-deployment` → (dev, note only), `develop` → stage, `main` → prod. Latest PR per env wins; `MERGED` → merged, `OPEN` → open; ignore closed-unmerged.
 2. `stage` = furthest env with a merged PR (never move an item backwards; never auto-move to `done`).

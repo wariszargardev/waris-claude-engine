@@ -25,6 +25,7 @@ waris-claude-engine/
 │   ├── protect-branches.js  PreToolUse: blocks push/commit/merge on main, develop, *-env-deployment, and PR merges
 │   └── skill-check.js       validates every SKILL.md (≤1024-char description, name = folder), zips it for claude.ai, syncs repo skills
 ├── routines/                scheduled tasks (morning brief, mentions watcher, book-policy watch, myAlfred queue status)
+├── agents/                  subagents: axiom-investigator (Sonnet), clickup-reader (Haiku), pr-plumber (Haiku)
 ├── memory/                  what Claude remembers about me and my work
 ├── settings/settings.json   permissions, deny list, hook registration, default mode
 ├── docs/                    pipeline cheat-sheet
@@ -39,8 +40,7 @@ waris-claude-engine/
 | Plan | `plan-cu` | `/plan-cu <cu-id> [branch: x]` |
 | Start | `start-work` | `/start-work <cu-id> [branch: x]` |
 | Build | (start-work) | `approved` |
-| PR | `create-pr` | `/create-pr [base: develop\|main] [skip review]` · `/create-pr stage` · `/create-pr prod` |
-| Deploy | `deploy-env` | `/deploy-env <test\|uat\|dev> [branch]` |
+| PR / deploy | `create-pr` (`deploy-env` = shortcut) | `/create-pr <develop\|test\|uat\|dev\|main> [branch] [skip review]` (asks the target if left out) |
 | Review | `pr-comments`, `pr-bot-loop` | `/pr-comments [PR or comment links]` |
 | Clean up | `clear-worktree` | `/clear-worktree [folder\|branch] [both local and remote]` |
 | Track | `release-tracker` | `track: …` · `untrack: …` · `/release-tracker` |
@@ -59,6 +59,7 @@ waris-claude-engine/
 | `skills/<name>` | `skills/<name>` (one junction per skill) |
 | `hooks/` | `hooks/` |
 | `scheduled-tasks/` | `routines/` |
+| `agents/` | `agents/` |
 | `projects/<project>/memory/` | `memory/` |
 | `settings.json` | **copy** of `settings/settings.json` (Claude rewrites this file, so it can't be a link) |
 

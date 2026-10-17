@@ -8,7 +8,7 @@ argument-hint: <cu-id | CU link> [branch: <existing-branch>] [repo]
 
 **Creates nothing.** No branch, no worktree, no composer/yarn/doppler, no file edits, no commits. The only write: the CU status (step 1).
 
-1. **Read the CU** (`clickup_get_task`, plus its parent task and comments), then move it to `in progress - development` with the `cu-status-start` rules from the `start-work` skill (step 0). Repo: the one I named; else the attached project's; else `blanka`.
+1. **Read the CU** with the `clickup-reader` subagent (task + parent + last comments; the lead then does the status write), then move it to `in progress - development` with the `cu-status-start` rules from the `start-work` skill (step 0). Repo: the one I named; else the attached project's; else `blanka`.
 2. **Find the branch** with the `branch-select` rules from the `start-work` skill (step 1): my `branch: …` → else CU id / parent CU id in a branch name → else an open, unmerged PR matching the feature → else "new `<type>/<name>-<cu-id>` from develop/main". If it's ambiguous, ask me once. State the decision in the first line.
 3. **Read code from where it lives:** the existing branch's worktree if it has one; otherwise the main checkout (`D:\Afia Insurance\Projects\Office\blanka`) after `git fetch` — read files at the right ref with `git show origin/<branch>:<path>` or `origin/develop` without switching branches.
 4. **Workflow (Office CLAUDE.md):** KB doc + skill for the area → only the relevant code (Explore sub-agent for broad searches) → if requirements are unclear, ask.
