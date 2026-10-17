@@ -46,6 +46,7 @@ waris-claude-engine/
 | Clean up | `clear-worktree` | `/clear-worktree [folder\|branch] [both local and remote]` |
 | Track | `release-tracker` | `track: …` · `untrack: …` · `/release-tracker` |
 | Inbox | `morning-brief`, `chat-mentions-watch`, `clickup-my-threads`, `clickup-release-status` | `/morning-brief` · `/clickup-my-threads days=7` · `/clickup-release-status uat` |
+| Prod data | `prod-data-change` | `/prod-data-change <cu or quote codes>` → queries → "give me the update query" → backup + change + rollback → "ran it" |
 | Ops | `book-policy-failed-attachments(-watch)`, `axiom-daily-report` | `/book-policy-failed-attachments 48h` |
 
 ---

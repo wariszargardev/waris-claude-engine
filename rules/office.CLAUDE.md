@@ -52,6 +52,7 @@ _Scope: work under `D:\Afia Insurance\Projects\Office\` (blanka and the other of
 | clear the worktree | `clear-worktree` | stop on uncommitted/unpushed work; remote only with "both local and remote" |
 | track / untrack / release status | `release-tracker` | data lives on the claude.ai page, never in chat or files |
 | any log question / ClickUp reads / git+PR mechanics | subagents `axiom-investigator` (Sonnet) / `clickup-reader` (Haiku) / `pr-plumber` (Haiku) | they only fetch or run mechanics and return a summary; the lead (main chat) makes every decision. FE+BE work: contract first, then `backend` + `frontend` in parallel, then the reviewers in parallel (start-work step 7) |
+| prod data fix / DB change / lead stuck in prod | `prod-data-change` | I never run SQL on prod — Waris does; order: investigate → read queries → impact review (models/observers) → **backup script first** → change by primary key in a transaction → rollback → Waris runs → verify + CU note → draft the fix CU |
 | morning brief, mentions, ClickUp inbox | `morning-brief`, `chat-mentions-watch`, `clickup-my-threads`, `clickup-release-status` | read-only outside their own outputs |
 
 ## My engine (waris-claude-engine)
