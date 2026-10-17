@@ -13,6 +13,8 @@ Run the parts below. If one part fails (connector not signed in, timeout), write
 
 - Me in ClickUp: Muhammad Waris, user id `73270543`. Timezone: Asia/Karachi (PKT).
 
+**Subagents:** run parts 1 + 2 through the `clickup-reader` agent (Haiku) and the PR/branch checks of part 4 through `pr-plumber` (Haiku); start independent parts in one message so they run in parallel. The lead only merges their summaries and writes the messages.
+
 ## 1. ClickUp — what needs me first
 
 ### 1a. New tasks assigned to me

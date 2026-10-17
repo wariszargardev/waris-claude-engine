@@ -66,6 +66,8 @@ Other failure types:
 
 ## Data source
 
+Run the Axiom queries through the `axiom-investigator` subagent (Sonnet, read-only): give it the window, the queries below and the fields needed; it returns the rows/counts. The lead builds the JSON, summary and email.
+
 Axiom MCP (`queryDataset`), dataset `insurancemarket_prod`. Always `truncate: false`; set the window with `startTime`.
 
 ### Query A — failures

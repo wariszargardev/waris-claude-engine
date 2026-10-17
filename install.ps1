@@ -19,6 +19,7 @@ function Link($path, $target) {
 Link (Join-Path $Claude 'waris-claude-engine')       $Repo
 Link (Join-Path $Claude 'hooks')           (Join-Path $Repo 'hooks')
 Link (Join-Path $Claude 'scheduled-tasks') (Join-Path $Repo 'routines')
+Link (Join-Path $Claude 'agents')          (Join-Path $Repo 'agents')
 Link $Memory                               (Join-Path $Repo 'memory')
 Get-ChildItem (Join-Path $Repo 'skills') -Directory | ForEach-Object { Link (Join-Path $Claude "skills\$($_.Name)") $_.FullName }
 

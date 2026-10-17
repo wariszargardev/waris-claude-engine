@@ -78,6 +78,16 @@ Right after setup: if `yarn prod` changed tracked files, commit them as `chore: 
 
 ## 7. After "approved" — build + test
 
+**Who builds what (subagents):**
+- **Small fix** (a few files, one layer) → the lead does it alone.
+- **Feature / CRUD across layers** → the plan must first fix the **contract**: tables/columns, routes + HTTP verbs, request fields + validation, response/Resource shape, Inertia page names + props. Then, in **one message**, start in parallel:
+  - `backend` agent → migrations, models, Form Requests, controllers, routes, services/jobs, API Resources, logging, Pest tests. Owns `app/`, `database/`, `routes/`, `config/`, `tests/`.
+  - `frontend` agent → Inertia/Vue pages, components, composables, forms. Owns `resources/js/`, `resources/css/`.
+  - Each gets the contract, its file list, the logging rules and "no commit, no push". Parts that depend on each other run in order instead.
+- **Lead after both:** merge, fix contract mismatches, run the relevant tests, `yarn prod` if frontend changed.
+- **Review, in parallel in one message:** `qa-reviewer` + `security-reviewer` + `performance-reviewer` (+ `alfred-orchestrator:find-bugs`) on the branch diff, including uncommitted work. The lead dedupes, fixes Critical/High and real bugs, re-runs the affected tests, and lists Medium/Low in the report.
+- Reading the CU → `clickup-reader`; any log question → `axiom-investigator`.
+
 Implement exactly the approved plan; logging rules (startQuoteLogging / startFeatureLogging at entry points, `info()` 2 params, `error()` with exception); no code comments; add/update tests and run only the relevant ones; self-review with `pr-review`; update or create the KB doc + skill. New things that weren't in the plan → stop and update the plan with me. **No commit, no push.**
 
 ## 8. Report

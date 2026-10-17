@@ -51,6 +51,7 @@ _Scope: work under `D:\Afia Insurance\Projects\Office\` (blanka and the other of
 | PR comments | `pr-comments` | fixes go in the feature branch, never in a deploy/base branch |
 | clear the worktree | `clear-worktree` | stop on uncommitted/unpushed work; remote only with "both local and remote" |
 | track / untrack / release status | `release-tracker` | data lives on the claude.ai page, never in chat or files |
+| any log question / ClickUp reads / git+PR mechanics | subagents `axiom-investigator` (Sonnet) / `clickup-reader` (Haiku) / `pr-plumber` (Haiku) | they only fetch or run mechanics and return a summary; the lead (main chat) makes every decision. FE+BE work: contract first, then `backend` + `frontend` in parallel, then the reviewers in parallel (start-work step 7) |
 | morning brief, mentions, ClickUp inbox | `morning-brief`, `chat-mentions-watch`, `clickup-my-threads`, `clickup-release-status` | read-only outside their own outputs |
 
 ## My engine (waris-claude-engine)

@@ -30,6 +30,8 @@ My request is permission for every step below (commit, push, branch, merge, buil
 
 **Hard stops:** uncommitted changes in a frozen (stage/prod) run; env base not updated from develop (step 3); secrets/unrelated files would be committed; push/gh/auth fails; a fix needs a migration, data change or `.env`.
 
+**Subagents:** mechanical steps (fetch, base pre-check, push, PR create/edit, label, bot wait/read, reply + resolve with the lead's text) can go to `pr-plumber` (Haiku). The lead keeps every decision: conflict resolution, code fixes, which comments need code.
+
 ## 1. Worktree + sync
 Find the feature branch's worktree (`git worktree list`); none → `git worktree add "D:\Afia Insurance\Projects\Office\<repo>-<requirement>" <branch>` + setup (composer `--ignore-platform-reqs` via PowerShell, `yarn prod`, doppler). `git fetch origin`; behind its remote → `git pull`. Busy in another worktree → don't force; `git pull` there if clean, else stop. One command per call, no `cd … &&` chains (use `git -C`).
 
