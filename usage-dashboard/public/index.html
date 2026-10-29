@@ -1,0 +1,279 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Claude Usage</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+:root {
+  color-scheme: light;
+  --bg: #f4f3ef; --surface: #fcfcfb; --border: #e3e1da;
+  --text: #0b0b0b; --text-2: #52514e; --muted: #8a8880;
+  --s1: #2a78d6; --s2: #eb6834; --s3: #1baf7a; --s4: #eda100; --other: #a8a69e;
+  --grid: #ecebe6;
+  --good: #1f8a3a; --warn: #b26b00; --bad: #c62f2f;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --bg: #121211; --surface: #1a1a19; --border: #2c2c2a;
+    --text: #f0efec; --text-2: #c3c2b7; --muted: #8f8e86;
+    --s1: #3987e5; --s2: #d95926; --s3: #199e70; --s4: #c98500; --other: #6b6a64;
+    --grid: #262624;
+    --good: #4cc26a; --warn: #e0a030; --bad: #ef6b6b;
+  }
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--text); font: 14px/1.45 system-ui, -apple-system, "Segoe UI", sans-serif; }
+.wrap { max-width: 1280px; margin: 0 auto; padding: 20px 16px 48px; }
+header { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; justify-content: space-between; margin-bottom: 16px; }
+h1 { font: 600 22px/1.2 Georgia, "Times New Roman", serif; margin: 0; }
+h2 { font: 600 16px/1.3 Georgia, serif; margin: 0 0 10px; }
+.live { display: inline-flex; align-items: center; gap: 6px; color: var(--text-2); font-size: 13px; }
+.dot { width: 8px; height: 8px; border-radius: 50%; background: var(--good); animation: pulse 2s infinite; }
+.dot.stale { background: var(--bad); animation: none; }
+@keyframes pulse { 50% { opacity: .35; } }
+select { background: var(--surface); color: var(--text); border: 1px solid var(--border); border-radius: 6px; padding: 5px 8px; font: inherit; }
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 16px; }
+.kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin-bottom: 14px; }
+.kpi .label { color: var(--text-2); font-size: 12px; }
+.kpi .value { font: 600 24px/1.2 Georgia, serif; margin-top: 4px; }
+.kpi .sub { color: var(--muted); font-size: 12px; margin-top: 2px; }
+.grid2 { display: grid; grid-template-columns: 3fr 2fr; gap: 14px; margin-bottom: 14px; }
+@media (max-width: 860px) { .grid2 { grid-template-columns: 1fr; } }
+.chartbox { position: relative; height: 260px; }
+.tips { display: grid; gap: 8px; }
+.tip { border-left: 3px solid var(--muted); padding: 8px 10px; background: var(--bg); border-radius: 0 6px 6px 0; }
+.tip.high { border-color: var(--bad); } .tip.medium { border-color: var(--warn); } .tip.low { border-color: var(--s1); }
+.tip .t { font-weight: 600; }
+.tip .w, .tip .h { color: var(--text-2); font-size: 13px; margin-top: 3px; }
+.tip .h::before { content: "Fix: "; font-weight: 600; color: var(--text); }
+.badge { display: inline-block; font-size: 11px; padding: 1px 7px; border-radius: 10px; border: 1px solid var(--border); color: var(--text-2); margin-right: 6px; }
+.badge.high { color: var(--bad); border-color: var(--bad); } .badge.medium { color: var(--warn); border-color: var(--warn); }
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+th { text-align: left; color: var(--text-2); font-weight: 600; border-bottom: 1px solid var(--border); padding: 6px; white-space: nowrap; }
+td { border-bottom: 1px solid var(--grid); padding: 6px; vertical-align: top; }
+td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+tr.row { cursor: pointer; } tr.row:hover td { background: var(--bg); }
+.ptext { max-width: 460px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+tr.detail td { background: var(--bg); color: var(--text-2); }
+.chips { display: flex; flex-wrap: wrap; gap: 4px; margin: 4px 0; }
+.chip { font-size: 12px; padding: 1px 7px; border-radius: 10px; background: var(--surface); border: 1px solid var(--border); }
+.scroll { overflow-x: auto; }
+.section { margin-bottom: 14px; }
+.muted { color: var(--muted); }
+.legend { display: flex; flex-wrap: wrap; gap: 12px; font-size: 12px; color: var(--text-2); margin-bottom: 6px; }
+.legend i { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 5px; vertical-align: -1px; }
+.warnbar { background: var(--bg); border: 1px dashed var(--warn); color: var(--warn); padding: 8px 10px; border-radius: 6px; margin-bottom: 12px; display: none; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <h1>Claude Code usage</h1>
+      <div class="live"><span class="dot" id="dot"></span><span id="updated">loading…</span></div>
+    </div>
+    <label class="muted">Range
+      <select id="range"><option value="7">7 days</option><option value="14" selected>14 days</option><option value="30">30 days</option><option value="60">60 days</option></select>
+    </label>
+  </header>
+
+  <div class="warnbar" id="warnbar"></div>
+
+  <div class="kpis" id="kpis"></div>
+
+  <div class="grid2">
+    <div class="card">
+      <h2>Tokens per day, by project</h2>
+      <div class="legend" id="dayLegend"></div>
+      <div class="chartbox"><canvas id="dayChart" aria-label="Tokens per day by project"></canvas></div>
+    </div>
+    <div class="card">
+      <h2 id="liveTitle">Live session: bag size per call</h2>
+      <div class="chartbox"><canvas id="liveChart" aria-label="Bag size per model call in the latest session"></canvas></div>
+    </div>
+  </div>
+
+  <div class="grid2">
+    <div class="card">
+      <h2>Where to improve</h2>
+      <div class="tips" id="tips"></div>
+    </div>
+    <div class="card">
+      <h2>Usage review</h2>
+      <div id="review" class="tips"></div>
+    </div>
+  </div>
+
+  <div class="card section">
+    <h2>Prompts <span class="muted" style="font: 400 13px system-ui">— click a row for tools, files and skills</span></h2>
+    <div class="scroll"><table id="prompts"></table></div>
+  </div>
+
+  <div class="grid2">
+    <div class="card">
+      <h2>Skills, agents &amp; MCP tools used</h2>
+      <div class="scroll"><table id="usage"></table></div>
+    </div>
+    <div class="card">
+      <h2>Projects: starting bag</h2>
+      <div class="scroll"><table id="projects"></table></div>
+      <h2 style="margin-top:16px">Subagent tokens</h2>
+      <div class="scroll"><table id="agents"></table></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+const css = v => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+const fmt = n => n >= 1e6 ? (n / 1e6).toFixed(1) + 'M' : n >= 1e3 ? Math.round(n / 1e3) + 'k' : String(Math.round(n || 0));
+const dur = ms => { const s = Math.round(ms / 1000); if (s < 60) return s + 's'; const m = Math.round(s / 60); return m < 60 ? m + 'm' : Math.floor(m / 60) + 'h ' + (m % 60) + 'm'; };
+const time = ts => new Date(ts).toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const open = new Set();
+let dayChart, liveChart, lastOk = 0, inFlight = false;
+
+function kpis(t) {
+  const items = [
+    ['Tokens today', fmt(t.tokens), 'input incl. cache + output'],
+    ['Output today', fmt(t.output), 'what Claude wrote'],
+    ['Prompts', t.prompts, t.sessions + ' sessions'],
+    ['Model calls', t.calls, t.prompts ? (t.calls / t.prompts).toFixed(1) + ' per prompt' : ''],
+    ['Working time', dur(t.workMs), 'prompt start → last reply'],
+    ['Cache hit', t.cacheHitPct + '%', 'of input read from cache'],
+    ['API-equivalent cost', '$' + t.costUSD.toFixed(0), 'sessions active today (cumulative)'],
+  ];
+  $('kpis').innerHTML = items.map(([l, v, s]) => `<div class="card kpi"><div class="label">${l}</div><div class="value">${v}</div><div class="sub">${s}</div></div>`).join('');
+}
+
+function drawDays(s) {
+  const top = s.projects.slice(0, 4).map(p => p.name);
+  const colors = ['--s1', '--s2', '--s3', '--s4'].map(css);
+  const labels = s.daysList.map(d => d.day.slice(5));
+  const sets = top.map((name, i) => ({ label: name, data: s.daysList.map(d => d.byProject[name] || 0), backgroundColor: colors[i] }));
+  const other = s.daysList.map(d => Object.entries(d.byProject).filter(([k]) => !top.includes(k)).reduce((a, [, v]) => a + v, 0));
+  if (other.some(v => v)) sets.push({ label: 'other', data: other, backgroundColor: css('--other') });
+  sets.forEach(x => Object.assign(x, { borderColor: css('--surface'), borderWidth: { top: 2 }, borderRadius: 4, borderSkipped: 'bottom', maxBarThickness: 36 }));
+  $('dayLegend').innerHTML = sets.map(x => `<span><i style="background:${x.backgroundColor}"></i>${esc(x.label)}</span>`).join('');
+  const opts = {
+    responsive: true, maintainAspectRatio: false, animation: false,
+    plugins: { legend: { display: false }, tooltip: { mode: 'index', intersect: false, callbacks: {
+      label: c => ` ${c.dataset.label}: ${fmt(c.raw)}`,
+      footer: items => { const d = s.daysList[items[0].dataIndex]; return `Total ${fmt(d.tokens)} · ${d.prompts || 0} prompts · ${dur(d.workMs || 0)}`; },
+    } } },
+    scales: {
+      x: { stacked: true, grid: { display: false }, ticks: { color: css('--text-2') } },
+      y: { stacked: true, grid: { color: css('--grid') }, border: { display: false }, ticks: { color: css('--text-2'), callback: v => fmt(v) } },
+    },
+  };
+  if (!dayChart) dayChart = new Chart($('dayChart'), { type: 'bar', data: { labels, datasets: sets }, options: opts });
+  else { dayChart.data = { labels, datasets: sets }; dayChart.options = opts; dayChart.update('none'); }
+}
+
+function drawLive(live) {
+  if (!live) return;
+  $('liveTitle').textContent = 'Live session: ' + (live.title || live.id.slice(0, 8)) + ' (' + live.project + ')';
+  const labels = live.series.map((_, i) => i + 1);
+  const data = live.series.map(p => p.bag);
+  const ds = [{ label: 'Bag size', data, borderColor: css('--s1'), backgroundColor: css('--s1'), borderWidth: 2, pointRadius: 0, pointHoverRadius: 5, tension: 0.2 }];
+  const opts = {
+    responsive: true, maintainAspectRatio: false, animation: false,
+    interaction: { mode: 'index', intersect: false },
+    plugins: { legend: { display: false }, tooltip: { callbacks: {
+      title: i => 'Call ' + i[0].label + ' · ' + time(live.series[i[0].dataIndex].ts),
+      label: c => ` Bag ${fmt(c.raw)} · output ${fmt(live.series[c.dataIndex].out)}`,
+    } } },
+    scales: {
+      x: { grid: { display: false }, ticks: { color: css('--text-2'), maxTicksLimit: 10 }, title: { display: true, text: 'model call', color: css('--muted') } },
+      y: { beginAtZero: true, grid: { color: css('--grid') }, border: { display: false }, ticks: { color: css('--text-2'), callback: v => fmt(v) } },
+    },
+  };
+  if (!liveChart) liveChart = new Chart($('liveChart'), { type: 'line', data: { labels, datasets: ds }, options: opts });
+  else { liveChart.data = { labels, datasets: ds }; liveChart.options = opts; liveChart.update('none'); }
+}
+
+function tips(list) {
+  $('tips').innerHTML = list.length ? list.map(t => `<div class="tip ${t.level}">
+    <div class="t"><span class="badge ${t.level}">${t.level === 'high' ? '▲ high' : t.level === 'medium' ? '● medium' : '○ low'}</span><span class="badge">${esc(t.area)}</span>${esc(t.title)}</div>
+    <div class="w">${esc(t.why)}</div><div class="h">${esc(t.how)}</div></div>`).join('') : '<div class="muted">Nothing to flag in this range.</div>';
+}
+
+function review(r) {
+  if (!r || !r.actions || !r.actions.length) { $('review').innerHTML = '<div class="muted">No review yet. It runs daily at 09:30 and 16:30, or say "review my Claude usage".</div>'; return; }
+  $('review').innerHTML = `<div class="muted">Written ${time(r.generatedAt)}${r.summary ? ' — ' + esc(r.summary) : ''}</div>` +
+    r.actions.map(a => `<div class="tip ${a.level || 'low'}"><div class="t">${esc(a.title)}</div><div class="w">${esc(a.why || '')}</div><div class="h">${esc(a.how || '')}</div></div>`).join('');
+}
+
+function prompts(list) {
+  const head = '<tr><th>When</th><th>Project</th><th>Prompt</th><th class="num">Time</th><th class="num">Calls</th><th class="num">Tools</th><th class="num">Bag max</th><th class="num">Tokens</th></tr>';
+  const rows = list.slice(0, 150).map(p => {
+    const main = `<tr class="row" data-id="${p.id}"><td>${time(p.start)}</td><td>${esc(p.project)}</td><td class="ptext" title="${esc(p.text)}">${esc(p.text)}</td>
+      <td class="num">${dur(p.durMs)}</td><td class="num">${p.calls}${p.subCalls ? ' +' + p.subCalls : ''}</td><td class="num">${p.toolCalls}</td><td class="num">${fmt(p.bagMax)}</td><td class="num">${fmt(p.total)}</td></tr>`;
+    if (!open.has(p.id)) return main;
+    const tools = Object.entries(p.tools).sort((a, b) => b[1] - a[1]).map(([k, n]) => `<span class="chip">${esc(k)} ×${n}</span>`).join('');
+    const agents = Object.entries(p.agents).map(([k, n]) => `<span class="chip">${esc(k)} ${fmt(n)}</span>`).join('');
+    const big = p.bigOutputs.map(o => `<li>${esc(o.tool)} ~${fmt(o.tokens)} — ${esc(o.detail)}</li>`).join('');
+    const det = p.details.slice(0, 25).map(d => `<li>${esc(d.tool)}: ${esc(d.detail)}</li>`).join('');
+    return main + `<tr class="detail"><td colspan="8">
+      <div>${esc(p.text)}</div>
+      <div class="chips">${tools || '<span class="muted">no tools</span>'}</div>
+      ${agents ? '<div>Subagents: <span class="chips">' + agents + '</span></div>' : ''}
+      <div>Start bag ${fmt(p.bagStart)} → max ${fmt(p.bagMax)} · cache read ${fmt(p.cacheRead)} · cache write ${fmt(p.cacheWrite)} · output ${fmt(p.out)}${p.gapMin != null ? ' · ' + p.gapMin + ' min after previous prompt' : ''}</div>
+      ${big ? '<div>Big tool outputs:<ul>' + big + '</ul></div>' : ''}
+      ${det ? '<details><summary>Tool calls</summary><ul>' + det + '</ul></details>' : ''}
+    </td></tr>`;
+  }).join('');
+  $('prompts').innerHTML = head + rows;
+}
+
+function usage(list) {
+  $('usage').innerHTML = '<tr><th>Name</th><th class="num">Uses</th><th class="num">Prompts</th><th class="num">Avg prompt tokens</th></tr>' +
+    (list.length ? list.map(u => `<tr><td>${esc(u.name)}</td><td class="num">${u.uses}</td><td class="num">${u.prompts}</td><td class="num">${fmt(u.avgPromptTokens)}</td></tr>`).join('') : '<tr><td colspan="4" class="muted">None in this range.</td></tr>');
+}
+
+function projects(list) {
+  $('projects').innerHTML = '<tr><th>Project</th><th class="num">Sessions</th><th class="num">Start bag</th><th class="num">Skills</th><th class="num">Over 1024</th></tr>' +
+    list.map(p => `<tr><td>${esc(p.name)}</td><td class="num">${p.sessions}</td><td class="num">${fmt(p.baseline)}</td><td class="num">${p.skills.count}</td><td class="num" title="${esc(p.skills.over1024.map(x => x.name).join(', '))}">${p.skills.over1024.length}</td></tr>`).join('');
+}
+
+function agents(map) {
+  const e = Object.entries(map).sort((a, b) => b[1] - a[1]);
+  $('agents').innerHTML = '<tr><th>Agent</th><th class="num">Tokens</th></tr>' + (e.length ? e.map(([k, v]) => `<tr><td>${esc(k)}</td><td class="num">${fmt(v)}</td></tr>`).join('') : '<tr><td colspan="2" class="muted">None.</td></tr>');
+}
+
+async function load() {
+  if (inFlight) return;
+  inFlight = true;
+  try {
+    const r = await fetch('/api/stats?days=' + $('range').value, { cache: 'no-store' });
+    const s = await r.json();
+    kpis(s.today); drawDays(s); drawLive(s.live); tips(s.tips); review(s.improvements);
+    prompts(s.prompts); usage(s.usage); projects(s.projects); agents(s.agentTokens);
+    $('warnbar').style.display = s.warnings.length ? 'block' : 'none';
+    $('warnbar').textContent = s.warnings.join(' · ');
+    lastOk = Date.now();
+    $('updated').textContent = 'live · updated ' + new Date().toLocaleTimeString();
+  } catch (e) {
+    $('updated').textContent = 'server not reachable — run: node usage-dashboard/start.js';
+  } finally {
+    inFlight = false;
+    $('dot').classList.toggle('stale', Date.now() - lastOk > 15000);
+  }
+}
+
+$('prompts').addEventListener('click', e => {
+  const tr = e.target.closest('tr.row');
+  if (!tr) return;
+  const id = tr.dataset.id;
+  open.has(id) ? open.delete(id) : open.add(id);
+  load();
+});
+$('range').addEventListener('change', load);
+load();
+setInterval(load, 5000);
+</script>
+</body>
+</html>

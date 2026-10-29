@@ -87,6 +87,14 @@
           {
             "type": "command",
             "command": "node \"C:/Users/Muhammad Waris/.claude/hooks/skill-check.js\""
+          },
+          {
+            "type": "command",
+            "command": "node \"C:/Users/Muhammad Waris/.claude/hooks/daily-repo-sync.js\""
+          },
+          {
+            "type": "command",
+            "command": "node \"C:/Users/Muhammad Waris/.claude/waris-claude-engine/usage-dashboard/start.js\""
           }
         ]
       }
