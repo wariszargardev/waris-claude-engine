@@ -68,6 +68,15 @@
             "command": "node \"C:/Users/Muhammad Waris/.claude/hooks/protect-branches.js\""
           }
         ]
+      },
+      {
+        "matcher": "mcp__(3391d6ba-a1ab-477e-8b0f-cade13dc5ecc|claude_ai_Google_Chat_MCP)__(send_message|mark_as_read|mark_as_unread|update_notification_settings)",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"C:/Users/Muhammad Waris/.claude/hooks/chat-send-guard.js\""
+          }
+        ]
       }
     ],
     "PostToolUse": [
