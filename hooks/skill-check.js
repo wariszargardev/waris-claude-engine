@@ -95,6 +95,8 @@ function onEdit(filePath) {
   try {
     buildZips([skillDir]);
     console.log(`Skill "${name}" OK. Upload zip ready: ${path.join(UPLOAD_DIR, name + '.zip')}`);
+    if (fs.existsSync(path.join(skillDir, 'tests.md')))
+      console.log(`"${name}" has tests.md — before calling this edit done, run: powershell -File "${path.join(path.dirname(WORKBENCH), 'scripts', 'skill-tests.ps1')}" ${name}  (all cases must PASS).`);
   } catch (e) {
     console.error(`Skill "${name}" zip failed: ${e.message}`);
   }

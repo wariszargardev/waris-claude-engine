@@ -5,9 +5,11 @@ description: My weekday 9:00 morning brief, posted to my Google Chat space "Morn
 
 # Morning brief
 
-**Read-only, with one exception:** part 4 creates missing PRs through the `create-pr` skill. Otherwise never merge, close, label or comment on a PR, and never merge any PR at all. Never change a ClickUp task (status, assignee, comment, time). Never accept/decline invites. Never send email (except the Gmail fallback in Delivery) and never create drafts. Never push or change branches except what `create-pr` does for a missing PR.
+**Read-only, with one exception:** part 4 creates missing PRs through the `create-pr` skill (which does its own push, label and bot loop for those new PRs). Outside that, never merge, close, label or comment on a PR, never reply to, react to or mark read any Chat mention or ClickUp comment, and never merge any PR at all. Never change a ClickUp task (status, assignee, comment, time). Never accept/decline invites. Never send email (except the Gmail fallback in Delivery) and never create drafts. Never push or change branches except what `create-pr` does for a missing PR.
 
 Run the parts below. If one part fails (connector not signed in, timeout), write "⚠️ <part> unavailable: <reason>" in that section and continue. Never stop the whole brief for one part.
+
+**Guard (scheduled runs):** Saturday or Sunday (Asia/Karachi) → do nothing. `~/.claude/secrets/brief-sent-<YYYY-MM-DD>.flag` exists for today (PKT) → don't post the brief again (only meeting reminders); after posting, create today's flag and delete flags older than 7 days. When I ask for it by hand, I can say "again" to re-post.
 
 **Window:** since the last brief — normally the last 24h. **On Monday**, use since Friday 09:00 (the whole weekend).
 
@@ -71,7 +73,7 @@ For every meeting today that starts more than 6 minutes from now:
 Repo: `D:\Afia Insurance\Projects\Office\blanka` (run `git -C` against it; `git fetch origin --prune` first). Read-only for everything except step 4 (create missing PRs). Never merge any PR.
 
 1. Branches = local branches (`git -C <repo> for-each-ref refs/heads --format='%(refname:short)'`), excluding: `main`, `develop`, `test-env-deployment`, `uat-env-deployment`, `new-dev-env-deployment`, and **any branch whose name contains `test`, `uat` or `dev-deployment`/`-deployment`**.
-   Also always ignore: `feat/health-renewal-MVP-86ew63z6m`.
+   **Also always ignore `feat/health-renewal-MVP-86ew63z6m`** — never list it and never create a PR for it.
 2. For each branch: `gh pr list --repo InsuranceMarket-ae/blanka --head <branch> --state all --json number,state,baseRefName,title,url,mergedAt,labels`.
 3. Group:
    - ⏳ **PR open into develop — pending stage merge**: number + title + link, labels (`ready for review`?), days open.
@@ -203,7 +205,7 @@ Organizer Ahsan · Meet link: <url|join>
 ## Delivery
 
 **Only to my Google Chat space "Morning Brief"**, via its webhook in `~/.claude/secrets/gchat-webhook.txt` (never print or log the URL). No email, no drafts.
-1. Post the **6 sections as 6 separate messages**, in order (Summary, Needs my reply, Google Chat waiting on me, My tasks by status, Meetings today, Blanka not on stage), using the Chat templates above.
+1. Post the **7 sections as 7 separate messages**, in order (Summary, Needs my reply, Google Chat waiting on me, My tasks by status, Meetings today, Blanka not on stage, Release tracker), using the Chat templates above.
    For each: write `{"text": "<message>"}` to a temp JSON file (UTF-8), then `curl -s -o /dev/null -w "%{http_code}" -X POST -H 'Content-Type: application/json; charset=UTF-8' --data-binary @<file> "<webhook>"`. Expect 200. Delete the temp file.
    Chat formatting: `*bold*`, `_italic_`, links `<url|text>`. Keep each message under 4,000 characters; split a section into "(1/2)", "(2/2)" if longer.
 2. **5-minute meeting reminder:** one message per meeting in the space (the ⏰ template), plus a PushNotification.

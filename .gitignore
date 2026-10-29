@@ -17,3 +17,5 @@ work-notes/
 runs/
 seen.json
 dashboard.html
+# usage dashboard runtime (server log, weekly review)
+usage-dashboard/data/

@@ -30,6 +30,7 @@ waris-claude-engine/
 ├── settings/settings.json   permissions, deny list, hook registration, default mode
 ├── docs/                    pipeline cheat-sheet
 ├── scripts/snapshot.ps1     copies the live settings.json back into the repo
+├── scripts/skill-tests.ps1  maker + checker dry run of a skill's tests.md (PASS/FAIL per case)
 └── install.ps1              links everything into ~/.claude (no admin needed)
 ```
 
@@ -45,6 +46,7 @@ waris-claude-engine/
 | Clean up | `clear-worktree` | `/clear-worktree [folder\|branch] [both local and remote]` |
 | Track | `release-tracker` | `track: …` · `untrack: …` · `/release-tracker` |
 | Inbox | `morning-brief`, `chat-mentions-watch`, `clickup-my-threads`, `clickup-release-status` | `/morning-brief` · `/clickup-my-threads days=7` · `/clickup-release-status uat` |
+| Prod data | `prod-data-change` | `/prod-data-change <cu or quote codes>` → queries → "give me the update query" → backup + change + rollback → "ran it" |
 | Ops | `book-policy-failed-attachments(-watch)`, `axiom-daily-report` | `/book-policy-failed-attachments 48h` |
 
 ---

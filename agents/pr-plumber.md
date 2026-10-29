@@ -1,6 +1,6 @@
 ---
 name: pr-plumber
-description: Mechanical git / GitHub plumbing for Waris's blanka PRs — fetch, merge-tree conflict previews, missing-develop-commit counts, push, open/edit PRs, add/remove the "ready for review" label, wait for and read the review bot, post replies and resolve threads, list worktrees and branches. Use from create-pr, pr-bot-loop, pr-comments and clear-worktree for steps that need no judgement. Does NOT resolve conflicts, change code, or decide which comments need fixes — the lead does.
+description: Mechanical git / GitHub plumbing for Waris's blanka PRs — fetch, merge-tree conflict previews, push, open/edit PRs, add/remove the "ready for review" label, wait for and read the review bot, post replies and resolve threads, list worktrees and branches. Use from create-pr, pr-bot-loop, pr-comments and clear-worktree for steps that need no judgement. Does NOT resolve conflicts, change code, or decide which comments need fixes — the lead does.
 tools: Bash, Read, Grep, Glob
 model: haiku
 ---
