@@ -1,8 +1,8 @@
-- [Blanka worktree & no-commit workflow](blanka-worktree-and-no-commit.md) — sibling worktree under Office\, never commit, composer+yarn install at end, logging + KB + skill
+- [Blanka worktree facts](blanka-worktree-and-no-commit.md) — superseded workflow; keeps --no-track incident, Doppler names, composer via PowerShell
 - [User profile & pain points](user-profile-and-pain-points.md) — senior SE on Blanka, basic Claude Code level, full list of manual tasks to automate
 - [Report design preference](report-design-preference.md) — reports as a dashboard page like the approved morning brief, short chat + link
 - [PowerShell UTF-8 garbling](powershell-utf8-garbling.md) — PS 5.1 Get-Content garbles ✅/→; assemble pages with Bash/Write, grep for "â" before publishing
-- [Claude Code learning plan](claude-code-learning-plan.md) — learning track status; still collecting responsibilities, resume at global CLAUDE.md + branch pattern
+- [Claude Code learning plan](claude-code-learning-plan.md) — Modules 1-5 done + revision page; next Module 6 (share + personal track)
 - [Google Chat thread links](google-chat-thread-links.md) — connector already works; link → spaces/<id>/threads/<id>; team user ids
 - [Review before PR](review-before-pr.md) — full local review + fixes before gh pr create; push once, label once
 - [Sale Summary stage + prod baseline](sale-summary-stage-baseline.md) — pre-deploy Sales Summary numbers (stage URLs + prod Jun–Aug Booked Policies CSV + prod Approved Txns 14/10 CSV) to compare after PR #15621 deploy
@@ -11,3 +11,5 @@
 - [Standup history Oct25–Sep26](standup-history-oct25-sep26.md) — de-duplicated work summary from standup space AAAAbPo0wLA; two sender ids (old 102340617184663758670 until 2026-04-17)
 - [Release tracker artifact](release-tracker-artifact.md) — tracker page URL, db collections, cheat-sheet URL (update via url)
 - [waris-claude-engine repo](waris-claude-engine-repo.md) — my personal Claude setup repo, junctions, install.ps1, GitHub warisfullstackdev
+- [Module 1 bag story](module1-bag-story.md) — how a turn works (empty bag, model asks / harness does, rule vs hook); explain new ideas on top of it
+- [Build Real Code brand](brand-build-real-code.md) — YouTube/Facebook dev brand, assets in D:\Social Media, LinkedIn stays personal
