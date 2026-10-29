@@ -7,7 +7,7 @@
 | 1 | Plan only | `/plan-cu <cu-id or link> [branch: <branch>]` | Reads CU (+ parent), picks the branch (given / existing feature / new), reads KB + skill + code, writes the plan. **Creates nothing.** | Yes — say **approved** |
 | 2 | Start | `/start-work <cu-id or link> [branch: <branch>] [repo]`<br>`/start-work <feat\|fix\|hotfix> <short description> [cu-id]` | Picks branch, creates/reuses worktree, composer + yarn prod + doppler, **first push** (new branch only), renames chat, then plans (or reuses the plan above). | Yes — say **approved** |
 | 3 | Build + test | `approved` | Sets up anything missing, builds exactly the plan: logging, tests, self-review, KB + skill. **No commit, no push.** | Only if something new comes up |
-| 4 | PR — any target | `/create-pr <develop\|test\|uat\|dev\|main> [branch] [skip review] [bypass]` (asks the target if you leave it out) | develop: commit → review → build → push → PR. test/uat/dev: pre-check base (behind develop → tags Ahsan) → deploy branch from that base → merge feature → build only if needed → changed tests → review → PR. main: hotfix PR. Then `ready for review` → bot loop. Never pushes/merges into protected branches. | No (hard stops only) |
+| 4 | PR — any target | `/create-pr <develop\|test\|uat\|dev\|main> [branch] [skip review]` (asks the target if you leave it out) | develop: commit → review → build → push → PR. test/uat/dev: deploy branch from that base → merge feature → build only if needed → changed tests → review → PR. main: hotfix PR. Then `ready for review` → bot loop. Never pushes/merges into protected branches. | No (hard stops only) |
 | 5 | Test / UAT / dev | `/create-pr uat` (shortcut: `/deploy-env uat`) | Same command, env target. Fixes always go in the feature branch, then re-merge. | No |
 | 6 | Review comments | `/pr-comments [pr number \| PR link \| comment links]` | Named comments → only those. None named → decides every open comment: fix + resolve / reply + resolve / leave for me. Fixes in feature branch, re-merge for deploy PRs, re-label. | Only for business decisions |
 | 7 | Stage | `/create-pr stage [branch]` | PR into develop that must match the UAT-tested version (extras reverted, code frozen, bot comments answered with reasons). | No |
@@ -35,7 +35,6 @@ Page: https://claude.ai/artifact/988rbaConLHDi6ia4Sjwy9
 ## Handy words
 
 - `skip review` — no local review, no bot loop (create-pr, any target).
-- `bypass` — continue a deploy even if test/UAT/dev isn't updated from develop.
 - `make it develop` / `base: main` — override the PR base.
 - `fix them` / `fix the bot comments` — allow code fixes on a stage/prod PR.
 - `both local and remote` — clear-worktree also deletes GitHub branches.

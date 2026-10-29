@@ -6,7 +6,7 @@ argument-hint: <pr-number> [fix-branch: <branch>] [deploy-branch: <branch>] [no-
 
 # PR bot loop
 
-Inputs: PR number; **fix branch** (the feature/fix/hotfix branch — all code fixes go there); **deploy branch** for test/uat/dev PRs; `no-code-changes` for stage/prod PRs. Skipped when I said "skip review".
+Inputs: PR number; **fix branch** (the feature/fix/hotfix branch — all code fixes go there); **deploy branch** for test/dev PRs (UAT PRs have none — their head is the fix branch, so step 3.3 is skipped); `no-code-changes` for stage/prod PRs. Skipped when I said "skip review".
 
 ## 1. Wait for the bot (don't block the chat)
 The bot (author `AhsanAshfaq`) posts either a **PR review** ("## Automated re-review @ `<sha8>`") or an **issue comment** ("## Automated PR review — `<sha>`"), plus inline review threads; it usually lands 5–8 minutes after the label. Note the head SHA (`gh pr view <pr> -R InsuranceMarket-ae/blanka --json headRefOid`) and the label time. Poll in the background every 60 s (max 15 min) and check **both** places for a body containing "Automated" and the first 8 chars of the head SHA:

@@ -1,6 +1,6 @@
 ---
 name: prod-data-change
-description: Safe production data fixes for blanka (IMCRM) — from a CU, a prod issue, an Excel/CSV or query result I share. Investigates why it happened (Axiom via axiom-investigator, the feature's skill + KB, the code), gives me read-only SQL to pull the data I need, then — only when I ask — reviews models/observers, gives a full-row backup script first, then the change script for the exact rows (SELECT preview, UPDATE/DELETE by primary key in a transaction, rollback with the old values, expected counts) and checks models/observers so nothing is left out of sync. Drafts the CU for the code fix that stops it happening again. Claude never runs SQL on prod — I run it, then Claude verifies and notes it on the CU. Use when I say "prod data fix", "DB change", "data fix for <CU>", "lead stuck / wrong data in prod", "give me the update/delete query", or share a CU / Excel about bad prod data.
+description: Safe production data fixes for blanka (IMCRM) — from a CU, a prod issue, an Excel/CSV or query result I share. Investigates why it happened (Axiom via axiom-investigator, the feature's skill + KB, the code), gives me read-only SQL to pull the data I need, then — only when I ask — reviews models/observers, gives a backup script first (key + only the changed columns), then the change script for the exact rows (SELECT preview, UPDATE/DELETE by primary key in a transaction, rollback with the old values, expected counts) and checks models/observers so nothing is left out of sync. Drafts the CU for the code fix that stops it happening again. Claude never runs SQL on prod — I run it, then Claude verifies and notes it on the CU. Use when I say "prod data fix", "DB change", "data fix for <CU>", "lead stuck / wrong data in prod", "give me the update/delete query", or share a CU / Excel about bad prod data.
 argument-hint: <cu-id | CU link | quote codes | issue text> [investigate | queries | change | verify | cu]
 ---
 
@@ -30,11 +30,22 @@ Files for each case: `D:\Afia Insurance\Projects\Office\waris-claude-engine\work
 - No schema changes here (that's a migration through a normal PR).
 
 **Step 3b — Backup, always before the change (`03-backup.sql`):**
-- For every table the change or its side effects touch: `SELECT * FROM <table> WHERE id IN (<ids>);` (here `*` is correct — it's a full-row backup) plus the related rows (e.g. the `personal_quotes` and `quote_status_logs` rows for those leads).
-- Tell me to run it and **export each result to CSV/Excel and keep it** (name: `<table>-<cu>-<date>.csv`) before running the change. Optional, only if I want it on the DB: `CREATE TABLE bak_<table>_<cu>_<yyyymmdd> AS SELECT * FROM <table> WHERE id IN (<ids>);`.
+- For every table the change or its side effects touch: select **the key columns (id / code / uuid) plus only the columns the change will update**, never `SELECT *`. Same for related rows (e.g. only the `personal_quotes` columns the mirror update touches). Example: `SELECT id, code, commission_vat, commission FROM payments WHERE code = 'CAR-XXXX';`.
+- Deletes are soft deletes by default, so their backup is just `SELECT id, deleted_at FROM <table> WHERE id IN (…);`. Only exception: a hard `DELETE` that I explicitly asked for needs the full row to re-insert it, so that one backup is `SELECT *`.
+- Tell me to run it and **export each result to CSV/Excel and keep it** (name: `<table>-<cu>-<date>.csv`) before running the change. Optional, only if I want it on the DB: `CREATE TABLE bak_<table>_<cu>_<yyyymmdd> AS SELECT <same columns> FROM <table> WHERE ...;`.
 - Ask me to paste the backup result (or row count + key old values) — the rollback is built from it.
 
 **Step 3c — Change script (`04-change.sql`):**
+
+**Script style (backup, change and rollback):**
+- **No session variables** (`SET @x := ...`). Write the literal value in every statement (`WHERE code = 'CAR-KXRBZLU4'`, `WHERE id = 12345`) so each statement can be copied and run on its own.
+- **One block per lead.** For several leads, repeat the block per lead with that lead's literal code/id and values; no shared variables, no loops.
+- Paste **both** blocks **directly in chat**, ready to copy, as well as saving them to the files:
+  1. **Backup**: the key + changed-column SELECTs, with "export each result to CSV and keep it".
+  2. **Change**: the preview `SELECT` (current values), then `START TRANSACTION;`, then each `UPDATE … WHERE code = '<literal>' AND <col> = <old>;` followed by `SELECT ROW_COUNT();  -- expect <n>`, then `COMMIT;` (or `ROLLBACK;` if a count is wrong).
+  3. **Rollback**: the same UPDATEs setting the **literal old values** (from the preview, the CU/screenshot or the backup; where an old value is not known yet, a clear `<OLD_col>` placeholder to fill from the backup CSV), with the new value as guard and the same ROW_COUNT checks.
+- Deletes follow the same order and blocks: backup (`id, deleted_at`, export to CSV) → soft-delete change → rollback (`deleted_at = NULL` for the same ids).
+- When I give the lead and the new values myself, keep the impact review short (only side effects it found) and go to these two blocks.
 
 **`04-change.sql` layout:**
 ```sql
@@ -48,11 +59,11 @@ UPDATE <table> SET <col> = <new>, updated_at = NOW() WHERE id IN (<ids>) AND <co
 SELECT ROW_COUNT();   -- check it equals <n>, then:
 COMMIT;               -- or ROLLBACK; if the count is wrong
 ```
-- Always `WHERE id IN (…)` from the preview; add the old value as an extra guard (`AND status = <old>`) so a re-run is harmless.
+- Always filter by the lead's literal primary key / code from the preview (`WHERE id IN (…)` or `WHERE code = '…'`); add the old value as an extra guard (`AND status = <old>`) so a re-run is harmless.
 - Deletes: prefer the soft delete (`SET deleted_at = NOW()`) when the model has it — its rollback sets `deleted_at = NULL` for the same ids; a hard `DELETE` only when I ask, and its rollback re-inserts the full rows from the backup.
 - Batches above ~500 rows → split by id range, one transaction each.
 
-**`05-rollback.sql`:** restores the exact old values per id (built from the backup/preview result I pasted — literal values, one statement per distinct old value), plus re-inserts for deletes. Same transaction + count check.
+**`05-rollback.sql`:** restores the exact old values per id (built from the backup/preview result I pasted — literal values, one statement per distinct old value), `deleted_at = NULL` for soft deletes, and re-inserts only for a hard DELETE I asked for. Same transaction + count check.
 
 **Dry run (only if I say so):** run the preview + change + rollback on staging/local through `doppler run -- php artisan tinker` (or the local DB) on equivalent test rows and report the counts. Never against prod.
 
