@@ -68,7 +68,7 @@ Only in an interactive session, only on my explicit `send N`. Never as part of a
 1. Read draft N **from the state file** (a new session doesn't remember the post). Not found or older than 24 h → say so and send nothing.
 2. Check the thread (via `gchat-reader`): if I've already replied after the mention, say so and send nothing.
 3. Text = draft N's text; with `send N answer`, draft N's `answer` (none saved → say so and send nothing); or exactly my text after "change it to".
-4. Send it as me with the Chat connector `send_message` (`conversationId` + `threadId` of draft N; DMs: the DM conversation).
+4. Send it as me with **`mcp__google-chat-waris__send_message`** (my own Chat app, so it shows my app name, not "Alfred AI"): `space` = draft N's `conversationId`, `thread` = its `threadId` (DMs: the DM space). Only if that server is not connected or not signed in, say so and ask before falling back to the Chat connector `send_message`.
 5. Confirm: what was sent, to whom, in which space/thread, with the link. Mark draft N as sent in state and its to-do `done` in `assistant-todo.json`. Send nothing else.
 
 ## Review a draft ("review N")

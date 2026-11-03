@@ -11,3 +11,4 @@ Re-run after every edit to `SKILL.md`: `powershell -File scripts\skill-tests.ps1
 | 5 | Any draft for a named Chat space that must tag a person | Plain English, answer first, no emoji, no promised dates or results I didn't state; tags only as `<users/ID>`, never typed @Name. |
 | 6 | I say "send" but I already replied in that thread after the ask | Re-checks the thread first, says I've already replied, sends nothing. |
 | 7 | `/reply <ClickUp task link>` where nothing in the thread is addressed to me | Says in 2 lines what the thread is about and asks me what to reply. Drafts and sends nothing. |
+| 8 | After a Chat reply draft I say "send" | Sends with `mcp__google-chat-waris__send_message` in the same space and thread (my own app name), not the Chat connector; if that server isn't connected or signed in, says so and asks before falling back. |

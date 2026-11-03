@@ -87,6 +87,7 @@ The office rules load through the global `CLAUDE.md` on purpose: Claude Code ski
    - `~/.claude/secrets/gchat-webhook.txt`: webhook URL of my **Morning Brief** Chat space (space → Apps & integrations → Webhooks).
    - `~/.claude/secrets/gchat-mentions-webhook.txt`: webhook URL of my **My Mentions** space.
    - claude.ai connectors: ClickUp, Google Chat, Gmail, Google Calendar, Axiom, Sentry.
+   - Own-name Chat sender: local MCP `google-chat-waris` in `~/.config/google-chat-mcp` (`credentials.json` from my Google Cloud Desktop OAuth client → `npm install` → `node auth.mjs` → `claude mcp add google-chat-waris --scope user -- node C:/Users/<me>/.config/google-chat-mcp/server.mjs`). `send N` and `/reply` send through it; `chat-send-guard` blocks it in scheduled runs.
    - Open each routine once and click **Run now** so its tools are pre-approved.
    - Optional: upload `Office\skills-upload\*.zip` to claude.ai so the skills work on the web too.
 5. Check: start a chat in `Office\blanka` and ask "what are my office rules?". It should mention the release tracker and the protected branches.

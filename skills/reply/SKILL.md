@@ -44,11 +44,13 @@ Draft:
 Checked: <source 1>; <source 2>
 ```
 
+Then stop: steps 1–3 only read and show the draft; nothing is sent.
+
 ## 4. Send (only on my "send")
 - Text = the draft, or exactly my text after "change it to".
 - Re-check the thread first: if I've already replied after the ask, say so and send nothing.
-- Chat → `send_message` in the same `conversationId` + `threadId`.
+- Chat → **`mcp__google-chat-waris__send_message`** (my own Chat app name, not "Alfred AI") with `space` = the `conversationId`, `thread` = the `threadId`; a file → `mcp__google-chat-waris__send_attachment`. Not connected / not signed in → say so and ask before falling back to the Chat connector `send_message`.
 - ClickUp → reply in that comment thread (or a task comment if there was no thread).
-- PR → `gh pr comment` or a reply to the review thread (`gh api …/pulls/<n>/comments/<id>/replies`). Don't resolve threads unless I ask.
+- PR review comment (`#discussion_r…`) → reply **in that review thread** (`gh api repos/<owner>/<repo>/pulls/<n>/comments/<id>/replies -f body=…`). General PR conversation → `gh pr comment`. Don't resolve threads unless I ask.
 - Gmail → `create_draft` in that thread only. **Never send an email**, even if I say send — tell me the draft is in Gmail.
 - Confirm in one line: what was sent, where, with the link. Then, if `assistant-todo.json` has an open item with this `messageId` or `link`, mark it done.

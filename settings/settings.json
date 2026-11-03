@@ -70,7 +70,7 @@
         ]
       },
       {
-        "matcher": "mcp__(3391d6ba-a1ab-477e-8b0f-cade13dc5ecc|claude_ai_Google_Chat_MCP)__(send_message|mark_as_read|mark_as_unread|update_notification_settings)",
+        "matcher": "mcp__(3391d6ba-a1ab-477e-8b0f-cade13dc5ecc|claude_ai_Google_Chat_MCP)__(send_message|mark_as_read|mark_as_unread|update_notification_settings)|mcp__google-chat-waris__(send_message|send_attachment)",
         "hooks": [
           {
             "type": "command",
