@@ -24,7 +24,7 @@ waris-claude-engine/
 ├── hooks/
 │   ├── protect-branches.js  PreToolUse: blocks push/commit/merge on main, develop, *-env-deployment, and PR merges
 │   └── skill-check.js       validates every SKILL.md (≤1024-char description, name = folder), zips it for claude.ai, syncs repo skills
-├── routines/                scheduled tasks (morning brief, mentions watcher, book-policy watch, myAlfred queue status)
+├── routines/                scheduled tasks (morning brief, mentions watcher, book-policy watch, LinkedIn, …); crons in routines/SCHEDULES.md
 ├── agents/                  subagents: axiom-investigator (Sonnet), clickup-reader (Haiku), pr-plumber (Haiku)
 ├── memory/                  what Claude remembers about me and my work
 ├── settings/settings.json   permissions, deny list, hook registration, default mode

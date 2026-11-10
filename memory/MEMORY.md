@@ -13,3 +13,4 @@
 - [waris-claude-engine repo](waris-claude-engine-repo.md) — my personal Claude setup repo, junctions, install.ps1, GitHub warisfullstackdev
 - [Module 1 bag story](module1-bag-story.md) — how a turn works (empty bag, model asks / harness does, rule vs hook); explain new ideas on top of it
 - [Build Real Code brand](brand-build-real-code.md) — YouTube/Facebook dev brand, assets in D:\Social Media, LinkedIn stays personal
+- [LinkedIn job search (Nov 2026)](linkedin-job-search-2026-11.md) — CV/LinkedIn/GitHub rebuilt 2026-11-10, Tue/Wed/Thu posting plan, files in work-notes/personal-track/career, open items
