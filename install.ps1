@@ -21,7 +21,16 @@ Link (Join-Path $Claude 'hooks')           (Join-Path $Repo 'hooks')
 Link (Join-Path $Claude 'scheduled-tasks') (Join-Path $Repo 'routines')
 Link (Join-Path $Claude 'agents')          (Join-Path $Repo 'agents')
 Link $Memory                               (Join-Path $Repo 'memory')
-Get-ChildItem (Join-Path $Repo 'skills') -Directory | ForEach-Object { Link (Join-Path $Claude "skills\$($_.Name)") $_.FullName }
+$OnDemand = Get-Content (Join-Path $Repo 'skills\on-demand.txt') | Where-Object { $_ -and -not $_.StartsWith('#') } | ForEach-Object { $_.Trim() }
+Get-ChildItem (Join-Path $Repo 'skills') -Directory | ForEach-Object {
+  $dest = Join-Path $Claude "skills\$($_.Name)"
+  if ($OnDemand -contains $_.Name) {
+    $item = Get-Item -LiteralPath $dest -Force -ErrorAction SilentlyContinue
+    if ($item -and $item.LinkType -eq 'Junction') { $item.Delete(); "unlinked $dest (on demand)" }
+    return
+  }
+  Link $dest $_.FullName
+}
 
 $Company = Join-Path $Office 'claude'
 if (-not (Test-Path (Join-Path $Company '.git'))) {

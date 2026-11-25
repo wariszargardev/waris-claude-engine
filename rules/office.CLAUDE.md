@@ -35,7 +35,7 @@ _Scope: work under `D:\Afia Insurance\Projects\Office\` (blanka and the other of
 
 ## Feature deliverables (every feature / fix / hotfix)
 - Before "done": a KB doc `knowledge-base/<feature>/README.md` (flow, entry points, rules, logging, config, tests) and a repo skill `.claude/skills/<feature>/SKILL.md` (points to the KB, how to debug in Axiom). Update existing ones first; never duplicate.
-- Skill `description` ≤1024 chars (aim <900), folder = `name`. The skill-check hook copies it to `~/.claude/skills` and zips it to `Office\skills-upload\` — tell me to re-upload the zip. List KB + skill paths in the status.
+- Skill `description` ≤1024 chars (aim <900), folder = `name`. Repo skills load only from their own repo (never copied to `~/.claude/skills`); the skill-check hook validates and zips it to `Office\skills-upload\` — tell me to re-upload the zip. List KB + skill paths in the status.
 
 ## Git (safety — always)
 - Never commit or push unless I ask ("create PR", a deploy, a release PR). Only exception: `/start-work` pushes a new branch once after setup.
@@ -57,6 +57,6 @@ _Scope: work under `D:\Afia Insurance\Projects\Office\` (blanka and the other of
 
 ## My engine (waris-claude-engine)
 - My setup lives in `D:\Afia Insurance\Projects\Office\waris-claude-engine` (git, `wariszargardev/waris-claude-engine`); `~/.claude` links into it.
-- New personal skill → `waris-claude-engine/skills/<name>/` + run `install.ps1`. Feature skills stay in their repo. Changed `settings.json` → `scripts/snapshot.ps1`. Never commit secrets, webhooks or prod data.
+- New personal skill → `waris-claude-engine/skills/<name>/` + run `install.ps1`. Personal-project / content skills also go in `skills/on-demand.txt` so they load only on demand. Feature skills stay in their repo. Changed `settings.json` → `scripts/snapshot.ps1`. Never commit secrets, webhooks or prod data.
 - **Maker and checker for skills:** a skill with a `tests.md` isn't done after an edit until `scripts/skill-tests.ps1 <skill>` passes every case (a fresh Claude answers from the skill, a second one grades it). A failing case means fix the skill (or a wrong test), never ignore it. New important skill → add 3–7 real cases to its `tests.md`.
 - If I repeat the same multi-step process, suggest turning it into a skill.
