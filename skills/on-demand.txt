@@ -1,0 +1,8 @@
+﻿# Personal-project skills: NOT linked into ~/.claude/skills, so they don't load in every chat.
+# Use one by naming it; Claude reads waris-claude-engine/skills/<name>/SKILL.md. Routines read them by path.
+build-real-code
+dev-trends-digest
+fb-tips
+flow-daily-batch
+job-hunt
+linkedin-post

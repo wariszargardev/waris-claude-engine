@@ -49,19 +49,6 @@ function isPersonal(dir) {
   return [PERSONAL, WORKBENCH].some(root => d.startsWith(real(root)));
 }
 
-function isLink(p) {
-  try { return fs.lstatSync(p).isSymbolicLink(); } catch { return false; }
-}
-
-function syncLocal(skillDir) {
-  const dest = path.join(PERSONAL, path.basename(skillDir));
-  if (isLink(dest) || real(dest) === real(skillDir))
-    throw new Error(`${dest} is a link to my waris-claude-engine repo — not overwriting it. Rename one of the skills.`);
-  fs.rmSync(dest, { recursive: true, force: true });
-  fs.cpSync(skillDir, dest, { recursive: true });
-  return dest;
-}
-
 function buildZips(skillDirs) {
   if (!skillDirs.length) return;
   fs.mkdirSync(UPLOAD_DIR, { recursive: true });
@@ -100,13 +87,6 @@ function onEdit(filePath) {
   } catch (e) {
     console.error(`Skill "${name}" zip failed: ${e.message}`);
   }
-  if (!isPersonal(skillDir)) {
-    try {
-      console.log(`Synced to ${syncLocal(skillDir)} (same name, same content).`);
-    } catch (e) {
-      console.error(`Sync of "${name}" failed: ${e.message}`);
-    }
-  }
   return 0;
 }
 
@@ -125,27 +105,21 @@ function onSessionStart(cwd) {
     const src = path.join(skillsDir, entry.name);
     const file = path.join(src, 'SKILL.md');
     if (!fs.existsSync(file)) continue;
-    const local = path.join(PERSONAL, entry.name, 'SKILL.md');
-    if (fs.existsSync(local) && fs.readFileSync(local, 'utf8') === fs.readFileSync(file, 'utf8')) continue;
-    if (fs.existsSync(local) && fs.statSync(local).mtimeMs > fs.statSync(file).mtimeMs) continue;
+    const zip = path.join(UPLOAD_DIR, `${entry.name}.zip`);
+    if (fs.existsSync(zip) && fs.statSync(zip).mtimeMs >= fs.statSync(file).mtimeMs) continue;
     const problem = validate(file);
     if (problem) {
       skipped.push(problem);
       continue;
     }
-    try {
-      syncLocal(src);
-      synced.push(src);
-    } catch (e) {
-      skipped.push(`${entry.name}: ${e.message}`);
-    }
+    synced.push(src);
   }
   try {
     buildZips(synced);
   } catch {}
   if (synced.length)
     console.log(
-      `Skills synced to ~/.claude/skills and re-zipped in ${UPLOAD_DIR}: ${synced.map(s => path.basename(s)).join(', ')}. Remind me to re-upload these zips to claude.ai.`
+      `Skills re-zipped in ${UPLOAD_DIR}: ${synced.map(s => path.basename(s)).join(', ')}. Remind me to re-upload these zips to claude.ai.`
     );
   if (skipped.length) console.log(`Skills not synced (fix these):\n- ${skipped.join('\n- ')}`);
   return 0;
